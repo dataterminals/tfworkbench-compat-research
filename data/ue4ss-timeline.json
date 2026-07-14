@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "subject": "RE-UE4SS (UE4SS-RE/RE-UE4SS) release + experimental timeline, focused on what affects runtime DataTable mods on UE5.4 games",
+    "updated": "2026-07-13",
+    "source_of_record": "https://github.com/UE4SS-RE/RE-UE4SS/releases",
+    "notes": "Partial/seed timeline from initial recon; the research workflow extends this through July 2026 and flags breaking changes relevant to TFWWorkbench. breaking=true means a change that plausibly affects a runtime DataTable editor."
+  },
+  "versions": [
+    {
+      "version": "3.0.0",
+      "channel": "stable",
+      "date": "2024-02-04",
+      "note": "Major release. Breaking: FName ctor default EFindName FNAME_Find -> FNAME_Add; new proxy DLL scheme (dwmapi.dll replaces xinput1_3.dll); install layout moved into a ue4ss/ subfolder.",
+      "breaking": true,
+      "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/releases"]
+    },
+    {
+      "version": "3.0.1",
+      "channel": "stable",
+      "date": "2024-02-14",
+      "note": "Patch for 3.0.0. C++ mods must be rebuilt. Predates UE5.4 support, so not the build TFW uses.",
+      "breaking": false,
+      "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/releases"]
+    },
+    {
+      "version": "experimental (patternsleuth CI, rolling)",
+      "channel": "experimental",
+      "date": "2024-2026",
+      "note": "Rolling CI builds on the modern patternsleuth resolver branch. This is the channel UE5.4.2 games like TFW actually use. Exact build that breaks TFWWorkbench = the open question this repo resolves.",
+      "breaking": true,
+      "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest"]
+    }
+  ]
+}
