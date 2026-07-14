@@ -65,10 +65,10 @@
       "ue4ss_dll_sha256": "a79b894d4a499c066985b47354d2a3a1fc9069cebefe585ba458bb8f572930b5",
       "tfwworkbench_version": "0.2.1",
       "status": "broken",
-      "symptom": "expected 0x7F main.dll load failure (predicted; confirm via UE4SS.log after a launch)",
-      "confidence": "inferred",
-      "notes": "Ground-truth local build (see local-evidence/2026-07-13-local-install.md). On the experimental-latest channel ~v3.0.1-1011, ~160 commits of C++ ABI drift past main.dll's Jan-2026 baseline. First-hand confirmation pending an in-game launch to read UE4SS.log. NOT literally commit b50986bd (that asset appeared 2026-07-13, after install).",
-      "sources": ["local-evidence/2026-07-13-local-install.md", "https://github.com/smotti/TFWWorkbench/issues/2"]
+      "symptom": "0x7F ERROR_PROC_NOT_FOUND at load: unresolved import ?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ (UStruct::GetMinAlignment()->int&; UE4SS narrowed it to int16&)",
+      "confidence": "verified",
+      "notes": "ABI-PROVEN by static import/export diff (2026-07-14): main.dll's 81 UE4SS imports, 80 resolve, exactly 1 missing -> deterministic 0x7F load failure. main.dll SHA-256 24b05dc2...; UE4SS ~v3.0.1-1011. See local-evidence/2026-07-14-abi-symbol-proof.md; reproduce with tools/abi-diff.py.",
+      "sources": ["local-evidence/2026-07-14-abi-symbol-proof.md", "local-evidence/2026-07-13-local-install.md", "https://github.com/smotti/TFWWorkbench/issues/2"]
     }
   ]
 }

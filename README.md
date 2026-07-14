@@ -15,29 +15,38 @@ put it plainly:
 > else: *"Fixable (probably)."*
 > ([`seed/running-log.txt`](seed/running-log.txt) — the origin of this repo.)
 
-> **Status:** `v0.1.0` — **root cause identified (2026-07-13),** via a verified,
-> adversarially-checked research pass (12 confirmed / 1 refuted / 1 uncertain). One
-> first-hand confirmation (read `UE4SS.log`) and a commit-level bisect remain open —
-> tracked honestly in [`meta/research-log.md`](meta/research-log.md).
+> **Status:** `v0.2.0` — **root cause PROVEN at the symbol level (2026-07-14).** A
+> static import/export diff pins the break to a single UE4SS symbol; run it yourself
+> with [`tools/abi-diff.py`](tools/abi-diff.py). See
+> [`meta/research-log.md`](meta/research-log.md).
 
 ---
 
 ## ⚠️ The answer
 
-**It's a C++ mod ABI mismatch.** TFWWorkbench ships a **precompiled C++
-`main.dll`** (219 KB) that imports UE4SS symbols by decorated name. UE4SS has
-shipped **no stable release since v3.0.1 (Feb 2024)** — "latest" is a **single
-rolling experimental build** (now ~`v3.0.1-1011-gb50986bd`) whose changelog admits
-the xmake→CMake migration *"cannot guarantee ABI compatability."* A build ~160
-commits past the mod's ~Jan-2026 baseline no longer exports a symbol the DLL needs,
-so Windows aborts the load with **`0x7F ERROR_PROC_NOT_FOUND`**. Live proof:
+**It's a C++ mod ABI mismatch — and we've proven the exact symbol.** TFWWorkbench
+ships a **precompiled C++ `main.dll`** (219 KB) that imports **81** UE4SS symbols by
+decorated name. Against the current UE4SS.dll, **80 resolve and exactly 1 doesn't**:
+
+```
+?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ   (UStruct::GetMinAlignment() -> int&)
+```
+
+UE4SS **narrowed that method's return type from `int32&` to `int16&`**, so the old
+mangled symbol vanished. One unresolved import → the loader aborts with **`0x7F
+ERROR_PROC_NOT_FOUND`** and `main.dll` never loads. UE4SS has shipped **no stable
+release since v3.0.1 (Feb 2024)** — "latest" is a rolling experimental build whose
+changelog admits the xmake→CMake migration *"cannot guarantee ABI compatability."*
+Reproduce: `python tools/abi-diff.py <main.dll> <UE4SS.dll>`. Live report:
 [TFWWorkbench issue #2](https://github.com/smotti/TFWWorkbench/issues/2) (open).
 
 - **Ruled out** (our original suspect): the `FName` `FNAME_Find`→`FNAME_Add` default
   flip — the mod passes `FNAME_Add` explicitly; a C++ default isn't part of a mangled
   symbol.
-- **Fix:** recompile `main.dll` against current UE4SS (keeps latest — the *"fixable
-  probably"* path), or pin UE4SS to ~`v3.0.1-848/-849`.
+- **Fix:** recompile `main.dll` against current UE4SS — and the symbol proof shows
+  the method still *exists* (just returns `int16&` now), so it's a **clean recompile,
+  zero source changes** (`short&`→`int` converts implicitly). Or pin UE4SS to
+  ~`v3.0.1-848/-849`.
 - **Author:** TFWWorkbench is by **smotti** (`smotti/TFWWorkbench` on GitHub); the
   origin-log complaint is from a modder whose mods *depend on* it.
 

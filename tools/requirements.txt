@@ -1,0 +1,3 @@
+# compat.py needs nothing (stdlib only).
+# abi-diff.py needs pefile for PE import/export parsing:
+pefile>=2024.8.26

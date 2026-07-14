@@ -13,10 +13,11 @@ Launch TFW once with TFWWorkbench v0.2.1 installed and UE4SS active, then read
   and flip the local `compat.json` row from `inferred` to `verified`.
 - Or run [`mod/TFWWorkbenchDoctor`](../mod/TFWWorkbenchDoctor) for the same signal.
 
-## 2. Identify the exact changed export  (makes H1 airtight)
-On the installed build: `dumpbin /exports UE4SS.dll` (or `llvm-nm`) and
-`dumpbin /imports main.dll`; diff the decorated names to find which UE4SS symbol
-`main.dll` needs that current UE4SS no longer provides. That names the precise break.
+## 2. Identify the exact changed export  ✅ DONE (2026-07-14)
+Proven via [`tools/abi-diff.py`](../tools/abi-diff.py): the single missing symbol is
+`?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ` (`UStruct::GetMinAlignment()->int&`,
+narrowed by UE4SS to `int16&`). See
+[`local-evidence/2026-07-14-abi-symbol-proof.md`](../local-evidence/2026-07-14-abi-symbol-proof.md).
 
 ## 3. Bisect the first-breaking build  (optional precision)
 Between `-849` (works) and `-1011` (broken), build `main.dll` against successive

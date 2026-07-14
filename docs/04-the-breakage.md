@@ -1,10 +1,14 @@
 # 04 — The breakage: root-cause analysis
 
-> **Status: primary cause identified (high confidence), with honest caveats.**
-> The mechanism is a **C++ mod ABI mismatch**. The *direction* ("newer UE4SS
-> specifically breaks it") rests on that mechanism plus the origin-log community
-> complaint plus a live open issue — not on a single version-stamped primary
-> source. That gap is stated explicitly below.
+> **Status: PROVEN (2026-07-14) at the symbol level.** A static import/export diff
+> of the two DLLs shows `main.dll` imports **81** UE4SS symbols, **80 resolve**
+> against the current UE4SS.dll, and **exactly one does not**:
+> `?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ` (`UStruct::GetMinAlignment() ->
+> int&`). UE4SS narrowed that method's return from `int32&` to `int16&`, so the
+> import can't bind → guaranteed `0x7F ERROR_PROC_NOT_FOUND`. This is a deterministic
+> loader outcome. Full analysis + reproduction:
+> [`local-evidence/2026-07-14-abi-symbol-proof.md`](../local-evidence/2026-07-14-abi-symbol-proof.md)
+> (`python tools/abi-diff.py <main.dll> <UE4SS.dll>`).
 
 ## TL;DR
 
@@ -18,22 +22,27 @@ be found` (ERROR_PROC_NOT_FOUND)**.
 
 ## Candidate root causes (ranked)
 
-### H1 — C++ mod ABI mismatch  ·  likelihood: HIGH  ·  **PRIMARY**
-A newer UE4SS renamed/removed/re-signatured/inlined an exported C++ symbol that
-`main.dll` imports by decorated name → the loader can't resolve the import → the
-DLL never loads.
+### H1 — C++ mod ABI mismatch  ·  **CONFIRMED (proven)**  ·  PRIMARY
+UE4SS re-signatured an exported C++ symbol that `main.dll` imports by decorated name
+→ the loader can't resolve the import → the DLL never loads.
+- **The exact break:** `UStruct::GetMinAlignment()` had its return type narrowed
+  `int32&` → `int16&`. `main.dll` (v0.2.1) imports the `int32&` mangling
+  `?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ`, which the current UE4SS.dll no
+  longer exports (it exports the `int16&` variant `…AEAFXZ` and a renamed private
+  `GetMinAlignmentBase` `…AEAHXZ`).
 - **Symptom:** clean **non-load** with `0x7F ERROR_PROC_NOT_FOUND`; UE4SS.log shows
   `Failed to load dll …main.dll… error: [0x7f]`.
-- **Evidence:** `TFWWorkbench-Cpp` links `UE4SS` and subclasses `CppUserModBase`,
-  importing `StaticFindObject`, the `FName` ctor, `UDataTable::AddRow/FindRowUnchecked/GetRowStruct`,
-  and `FProperty`/`CastField`. UE4SS ships no stable since 3.0.1; xmake→CMake
-  (PR #1067) *"cannot guarantee ABI compatability."* TFWWorkbench issues
-  [#2](https://github.com/smotti/TFWWorkbench/issues/2) (OPEN) and
-  [#1](https://github.com/smotti/TFWWorkbench/issues/1) show the exact 0x7F; upstream
-  RE-UE4SS [#696](https://github.com/UE4SS-RE/RE-UE4SS/issues/696) has a maintainer
-  diagnosing an identical 0x7F as *"the mod does not have ABI compatibility."*
-- **Caveat:** no issue records the reporter's UE4SS build, so causation *for this
-  mod* is a strong inference, not a version-stamped proof.
+- **Proof:** static import/export diff — 81 UE4SS imports, 80 resolve, 1 missing (the
+  symbol above). A single unresolved import deterministically fails the load. Fully
+  reproducible from the two DLLs:
+  [`local-evidence/2026-07-14-abi-symbol-proof.md`](../local-evidence/2026-07-14-abi-symbol-proof.md).
+- **Corroboration:** TFWWorkbench issues [#2](https://github.com/smotti/TFWWorkbench/issues/2)
+  (OPEN) / [#1](https://github.com/smotti/TFWWorkbench/issues/1) show the exact 0x7F;
+  upstream RE-UE4SS [#696](https://github.com/UE4SS-RE/RE-UE4SS/issues/696): 0x7F ==
+  C++ mod ABI incompatibility; xmake→CMake (PR #1067) *"cannot guarantee ABI compatability."*
+- **Residual caveat:** the analysis proves *this build cannot load this mod*. That the
+  broader community complaint is the same symbol (vs a different newer build) is
+  extremely likely but not separately version-stamped in any issue.
 
 ### H2 — Struct/layout drift (loads, then crashes)  ·  likelihood: MEDIUM  ·  SECONDARY
 If the imports still resolve but a consumed UE object layout changed, `main.dll`
