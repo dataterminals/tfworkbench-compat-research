@@ -1,0 +1,27 @@
+# Python (compat tooling)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# UE4SS / mod artifacts that should never live in the repo
+*.pak
+*.utoc
+*.ucas
+*.sig
+UE4SS.dll
+dwmapi.dll
+*.log
+
+# Large downloaded UE4SS build zips kept for local bisecting (track by hash in data/, not by blob)
+builds/
+*.zip

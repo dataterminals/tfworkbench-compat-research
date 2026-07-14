@@ -1,0 +1,32 @@
+{
+  "$schema": "./schema/compat.schema.json",
+  "meta": {
+    "subject": "TFWWorkbench (smotti/TFWWorkbench) x RE-UE4SS on The Forever Winter (UE 5.4.2)",
+    "updated": "2026-07-13",
+    "maintainer": "dataterminals",
+    "notes": "Compatibility matrix for the 'latest UE4SS breaks TFWWorkbench' problem. status: works|broken|partial|unknown. confidence: verified (first-hand)|reported (community)|inferred|untested. UE4SS CI builds carry no version metadata, so ue4ss_dll_sha256 is the stable identifier. Populated in part by the tfworkbench-compat-research workflow; unverified rows are marked confidence=untested/inferred until confirmed."
+  },
+  "tfwworkbench_versions": [
+    {
+      "version": "0.2.1",
+      "released": "2026-01-20",
+      "source": "https://github.com/smotti/TFWWorkbench/releases"
+    }
+  ],
+  "entries": [
+    {
+      "ue4ss_build": "experimental CI (patternsleuth) - local install 2026-07-12",
+      "ue4ss_channel": "experimental",
+      "ue4ss_date": "2026-07-12",
+      "ue4ss_dll_sha256": "a79b894d4a499c066985b47354d2a3a1fc9069cebefe585ba458bb8f572930b5",
+      "tfwworkbench_version": "0.2.1",
+      "status": "unknown",
+      "symptom": null,
+      "confidence": "untested",
+      "notes": "Ground-truth local build (see local-evidence/2026-07-13-local-install.md). Confirmed patternsleuth/experimental branch, not stable 3.0.1. TFWWorkbench not yet loaded against it; awaiting in-game test and community corroboration. This is a candidate for the 'latest that breaks it' end of the range.",
+      "sources": [
+        "local-evidence/2026-07-13-local-install.md"
+      ]
+    }
+  ]
+}

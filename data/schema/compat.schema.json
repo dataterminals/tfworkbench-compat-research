@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/dataterminals/tfworkbench-compat-research/data/schema/compat.schema.json",
+  "title": "TFWWorkbench × UE4SS compatibility matrix",
+  "type": "object",
+  "required": ["meta", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "meta": {
+      "type": "object",
+      "required": ["subject", "updated"],
+      "additionalProperties": false,
+      "properties": {
+        "subject": { "type": "string" },
+        "updated": { "type": "string", "description": "ISO date YYYY-MM-DD" },
+        "maintainer": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "tfwworkbench_versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["version"],
+        "additionalProperties": false,
+        "properties": {
+          "version": { "type": "string" },
+          "released": { "type": "string" },
+          "source": { "type": "string" }
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "description": "One row per (UE4SS build × TFWWorkbench version) compatibility observation.",
+      "items": {
+        "type": "object",
+        "required": ["ue4ss_build", "ue4ss_channel", "tfwworkbench_version", "status", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "ue4ss_build": { "type": "string", "description": "Human label: tag, release name, or 'experimental CI <date/commit>'." },
+          "ue4ss_channel": { "type": "string", "enum": ["stable", "experimental", "unknown"] },
+          "ue4ss_date": { "type": "string", "description": "Build/release date if known (YYYY-MM-DD)." },
+          "ue4ss_commit": { "type": "string", "description": "Git commit hash if known." },
+          "ue4ss_dll_sha256": { "type": "string", "description": "SHA-256 of UE4SS.dll — the stable identifier when metadata is absent." },
+          "tfwworkbench_version": { "type": "string" },
+          "status": { "type": "string", "enum": ["works", "broken", "partial", "unknown"] },
+          "symptom": { "type": ["string", "null"], "description": "Observed failure mode when broken (e.g. 'crash on load', 'tables not applied')." },
+          "confidence": { "type": "string", "enum": ["verified", "reported", "inferred", "untested"] },
+          "notes": { "type": "string" },
+          "sources": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
