@@ -84,3 +84,31 @@ we know** — preserve provenance; never silently promote a guess to a fact.
 **Next**
 - First-hand confirm via `UE4SS.log`; bisect; export-diff; pursue a rebuild. See
   [`next-session.md`](next-session.md).
+
+---
+
+## 2026-07-14 — H1 PROVEN at the symbol level (export-diff)
+
+**Done**
+- Downloaded TFWWorkbench v0.2.1 (official release; `main.dll` SHA-256 `24b05dc2…`,
+  219,136 B) and statically diffed its imports against the local UE4SS.dll exports
+  with `pefile`. Added a reusable [`tools/abi-diff.py`](../tools/abi-diff.py) and
+  wrote up [`local-evidence/2026-07-14-abi-symbol-proof.md`](../local-evidence/2026-07-14-abi-symbol-proof.md).
+
+**Learned (Verified — this is now proof, not inference)**
+- `main.dll` imports **81** UE4SS symbols; **80 resolve** against the current
+  UE4SS.dll (4,106 exports); **exactly 1 is missing**:
+  `?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ` = `UStruct::GetMinAlignment() ->
+  int&`. One unresolved import → deterministic `0x7F ERROR_PROC_NOT_FOUND`. **H1 confirmed.**
+- **What changed:** UE4SS narrowed `UStruct::MinAlignment` from `int32` to `int16`
+  (return `H`→`F`) and moved the old `int&` accessor to a private `GetMinAlignmentBase`.
+  It's a **re-signature, not a removal** — so a **clean recompile (no source change)
+  fixes it** (`short&`→`int` converts implicitly).
+
+**Learned (Inferred / open)**
+- Exact upstream commit that narrowed `MinAlignment` lives in UE4SS's **Unreal SDK
+  submodule** (not the main repo tree); not pinned. Doesn't affect the proof.
+
+**Next**
+- Task #2: recompile `main.dll` against current UE4SS and confirm it loads. See
+  [`next-session.md`](next-session.md).
