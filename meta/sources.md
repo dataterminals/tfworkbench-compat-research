@@ -17,16 +17,26 @@ Primary sources for this investigation. Prefer these over memory; cite them in d
 - Upstream #696 (maintainer: 0x7F == C++ mod ABI incompatibility): <https://github.com/UE4SS-RE/RE-UE4SS/issues/696>
 
 ## TFWWorkbench
+- **Author/maintainer: smotti** (GitHub repo owner).
 - Release container repo: <https://github.com/smotti/TFWWorkbench>
 - C++ source (submodule): <https://github.com/smotti/TFWWorkbench-Cpp>
   - `CMakeLists.txt` (`target_link_libraries(TFWWorkbench PUBLIC UE4SS)`) and
-    `dllmain.cpp` (`RC::CppUserModBase`, `ModAuthors="terraru"`, registers
-    `AddDataTableRow`/`ConfigureDataTables`).
+    `dllmain.cpp` (`RC::CppUserModBase`, registers `AddDataTableRow`/`ConfigureDataTables`).
+  - ⚠️ **Attribution caveat:** the `dllmain.cpp` `ModAuthors` field reportedly reads
+    `"terraru"`, and a dependent mod's Nexus page credits terraru "for making
+    TFWWorkbench." **This does not establish authorship** — the GitHub project is
+    smotti's, and the user (a TFW-modding insider) confirmed smotti made it. terraru's
+    actual relationship (contributor? same person? community credit?) is **unverified**.
+    An earlier draft of this repo wrongly called terraru the author; corrected 2026-07-14.
 - Releases (v0.1.0 2026-01-14, v0.2.1 2026-01-20; ships `dlls/main.dll` 219,136 B):
   <https://github.com/smotti/TFWWorkbench/releases>
 - Issue #2 (OPEN, 2026-07-14, 0x7F main.dll load fail): <https://github.com/smotti/TFWWorkbench/issues/2>
 - Issue #1 (2026-03-15, identical 0x7F, closed as user install error): <https://github.com/smotti/TFWWorkbench/issues/1>
-- TFW Nexus mod 77 (floor: "UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER"): <https://www.nexusmods.com/theforeverwinter/mods/77>
+- Nexus mod 77 = **"Construction Vendor"** (a mod that *depends on* TFWWorkbench),
+  which carries the community floor note "UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER":
+  <https://www.nexusmods.com/theforeverwinter/mods/77>
+  - Note: a sibling repo's older research labeled mod 77 as TFWWorkbench itself; that
+    mapping is contested — treat the TFWWorkbench↔Nexus-mod-number link as unverified.
 
 ## The Forever Winter modding
 - Steam page (AppID 2828860): <https://store.steampowered.com/app/2828860/>
