@@ -39,3 +39,48 @@ we know** — preserve provenance; never silently promote a guess to a fact.
 - Fold workflow `wu3yvil3x` results into `docs/02`, `docs/04`, `docs/05`, and
   `data/compat.json`. Run the game once to capture the `UE4SS.log` version banner.
   See [`next-session.md`](next-session.md).
+
+---
+
+## 2026-07-13 — Verified research landed; leading hypothesis OVERTURNED
+
+**Done**
+- Workflow `wu3yvil3x` completed: 5 research finders → 14 adversarial verifications
+  (**12 confirmed / 1 refuted / 1 uncertain**) → synthesis. ~1.1M tokens, 20 agents,
+  0 errors.
+- Rewrote `docs/02`, `docs/03`, `docs/04`, `docs/05`, `docs/00`, patched `docs/01`;
+  replaced `data/compat.json` (5 rows) + `data/ue4ss-timeline.json`; pivoted the mod
+  pillar (renamed `TFWWorkbenchCompatShim` → `TFWWorkbenchDoctor`, added
+  `mod/rebuild-recipe.md` + `mod/README.md`).
+
+**Learned (Verified)**
+- **Root cause = C++ mod ABI mismatch**, not a behavior change. TFWWorkbench is a
+  **C++/Lua hybrid** ([smotti/TFWWorkbench-Cpp](https://github.com/smotti/TFWWorkbench-Cpp))
+  shipping a precompiled `dlls/main.dll` (219,136 B) that imports UE4SS symbols by
+  decorated name. Newer UE4SS drops/renames one → `0x7F ERROR_PROC_NOT_FOUND` at
+  load. Live: TFWWorkbench issue #2 (open); upstream RE-UE4SS #696 confirms 0x7F ==
+  ABI incompatibility.
+- **No stable UE4SS since v3.0.1 (2024-02-14).** "Latest" = one rolling
+  `experimental-latest` prerelease, git-describe `v3.0.1-<N>-g<hash>`; current
+  ~`v3.0.1-1011-gb50986bd`. xmake→CMake migration (PR #1067) *"cannot guarantee ABI
+  compatability"* — the enabler.
+- **Recommended pin:** ~`v3.0.1-848/-849` (~Jan 2026) — Nexus floor + inferred ABI
+  baseline. But the Nexus "OR HIGHER" advice is now stale.
+- **`terraru` is TFWWorkbench's C++ author** (`ModAuthors="terraru"`) — the origin-log
+  complaint is about their own mod.
+
+**Overturned (this is why we verify)**
+- The `FName` `FNAME_Find`→`FNAME_Add` flip — my day-1 leading suspect (H1, "HIGH")
+  — is a **refuted red herring**: mod passes `FNAME_Add` explicitly; a C++ default
+  isn't in the mangled symbol. Verification also refuted the Lua-default sub-claim.
+
+**Learned (Inferred / open)**
+- Exact first-breaking commit between `-849` and `-1011`: **not bisected**.
+- Which specific export changed: resolvable via `dumpbin /exports` vs `main.dll`
+  imports — **not yet done**.
+- Direction ("newer breaks it") rests on mechanism + terraru + issue #2, since no
+  issue records the reporter's UE4SS build and issue #1's 0x7F was a user install error.
+
+**Next**
+- First-hand confirm via `UE4SS.log`; bisect; export-diff; pursue a rebuild. See
+  [`next-session.md`](next-session.md).

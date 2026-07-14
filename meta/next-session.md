@@ -1,39 +1,40 @@
 # Next session — what to do next
 
-Priority order. Check [`research-log.md`](research-log.md) for the latest state.
+Root cause is identified (C++ ABI mismatch). Remaining work is first-hand
+confirmation, precision, and shipping a fix. See [`research-log.md`](research-log.md).
 
-## 1. Fold in the research workflow results  (blocked on workflow `wu3yvil3x`)
-When the verified-research workflow finishes, take its `synthesis` object and:
-- Extend the UE4SS timeline table in [`docs/02-ue4ss-versions.md`](../docs/02-ue4ss-versions.md)
-  and [`data/ue4ss-timeline.json`](../data/ue4ss-timeline.json).
-- Promote/refute hypotheses in [`docs/04-the-breakage.md`](../docs/04-the-breakage.md).
-- Fill the pin + downgrade links in [`docs/05-known-good-and-workarounds.md`](../docs/05-known-good-and-workarounds.md).
-- Add `compatMatrix` rows to [`data/compat.json`](../data/compat.json) (set
-  `confidence` honestly: `reported` for community claims, `verified` only for
-  first-hand tests). Re-run `python tools/compat.py validate`.
+## 1. Confirm the failure mode first-hand  (cheap, high value)
+Launch TFW once with TFWWorkbench v0.2.1 installed and UE4SS active, then read
+`…\Binaries\Win64\ue4ss\UE4SS.log`:
+- Look for `Failed to load dll …main.dll… error: [0x7f]` → confirms the ABI break (H1).
+- Capture the **git-describe version banner** at the top → record it + the
+  `UE4SS.dll` SHA-256 (`a79b894d…`) in
+  [`local-evidence/2026-07-13-local-install.md`](../local-evidence/2026-07-13-local-install.md)
+  and flip the local `compat.json` row from `inferred` to `verified`.
+- Or run [`mod/TFWWorkbenchDoctor`](../mod/TFWWorkbenchDoctor) for the same signal.
 
-## 2. Capture the local UE4SS version banner  (first-hand, high value)
-Launch TFW once with UE4SS active, then read the top of
-`…\Binaries\Win64\ue4ss\UE4SS.log` — it prints the exact version/commit. Record it
-in [`local-evidence/2026-07-13-local-install.md`](../local-evidence/2026-07-13-local-install.md)
-and as a `compat.json` entry keyed by the `UE4SS.dll` SHA-256 `a79b894d…`.
+## 2. Identify the exact changed export  (makes H1 airtight)
+On the installed build: `dumpbin /exports UE4SS.dll` (or `llvm-nm`) and
+`dumpbin /imports main.dll`; diff the decorated names to find which UE4SS symbol
+`main.dll` needs that current UE4SS no longer provides. That names the precise break.
 
-## 3. Read the TFWWorkbench source
-Confirm which UE4SS calls it uses (Lua vs C++; `StaticFindObject`, `FName` handling,
-row iteration). This turns the H1–H4 hypotheses in `docs/04` from inferred to
-grounded. Link exact files/lines.
+## 3. Bisect the first-breaking build  (optional precision)
+Between `-849` (works) and `-1011` (broken), build `main.dll` against successive
+UE4SS commits (or just check export presence per build) to find the boundary. Log
+each result to [`data/compat.json`](../data/compat.json) with its `UE4SS.dll` SHA-256.
 
-## 4. Bisect (if a repro is set up)
-Follow the bisect protocol in `docs/05`. Swap only `UE4SS.dll`(+`dwmapi.dll`)
-between experimental builds with TFWWorkbench v0.2.1 fixed; log each result to
-`compat.json` with its SHA-256. Binary-search to the boundary build.
-
-## 5. Only after a cause is CONFIRMED: implement the shim
-Flip `ENABLE_FIX` in [`mod/TFWWorkbenchCompatShim/Scripts/main.lua`](../mod/TFWWorkbenchCompatShim/Scripts/main.lua)
-and implement compensation for the confirmed cause. Test load-order (shim above
-TFWWorkbench in `mods.txt`).
+## 4. Ship a fix
+- **Preferred:** follow [`mod/rebuild-recipe.md`](../mod/rebuild-recipe.md) —
+  recompile `main.dll` against current UE4SS, test, add a `works` row, and offer it
+  upstream to smotti/terraru (issue #2 is open and unanswered).
+- **Fallback for users now:** document a reliable way to obtain a ~`v3.0.1-848/-849`
+  UE4SS build (a working download/mirror is currently **unconfirmed** — see the
+  fragility notes in [`docs/05`](../docs/05-known-good-and-workarounds.md)).
 
 ## Open questions parking lot
-- Does the Vortex extension (Nexus 121) pin a UE4SS build, or pull `experimental-latest`?
-- Did smotti ever note a target UE4SS build for v0.2.1?
-- Is there already a community fork/patch of TFWWorkbench for newer UE4SS?
+- Exact UE4SS commit smotti built v0.2.1 against (not pinned in the repo).
+- Is an archived `v3.0.1-848` zip obtainable (Nexus old-files / TFW Discord)?
+- Will smotti/terraru rebuild? (no repo activity since 2026-01-20.)
+- Does H2 (TObjectPtr smart-pointer rework, PR #850) ever manifest as a
+  load-then-crash instead of a clean 0x7F? Only relevant if a rebuilt DLL loads but
+  crashes at apply time.

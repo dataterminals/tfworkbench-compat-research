@@ -3,8 +3,9 @@
 ## The one-sentence problem
 
 On **The Forever Winter** (Unreal Engine 5.4.2), updating **RE-UE4SS** to a newer
-build can break **TFWWorkbench** and every mod that depends on it — and nobody has
-written down *which* build introduced the break or *why*.
+build breaks **TFWWorkbench** — because TFWWorkbench ships a **precompiled C++ DLL**
+that is **ABI-locked** to the UE4SS it was built against, and UE4SS's rolling
+experimental builds keep changing that ABI.
 
 ## Where this came from
 
@@ -13,56 +14,60 @@ A modder (terraru) in a TFW modding chat:
 > "you can't use the latest ue4ss version when having TFWorkbench as a dependency…
 > Not sure what version introduced some changes that breaks the mod."
 
-Another modder replied that it's *"fixable (probably)."* That exchange
-([`seed/running-log.txt`](../seed/running-log.txt)) is the seed of this repo.
+Another modder: *"fixable (probably)."* ([`seed/running-log.txt`](../seed/running-log.txt).)
 
-## Why it matters
+> **Plot twist we found:** `terraru` is the **C++ author of TFWWorkbench**
+> (`ModAuthors = "terraru"` in `dllmain.cpp`), and the *"UE4SS MUST BE v3.0.1-848 OR
+> HIGHER"* note on TFW Nexus mod 77 is theirs. terraru was describing the breakage
+> of **their own mod's** dependency. The loop closes.
 
-TFWWorkbench is a **framework dependency**: it lets multiple content mods add/modify
-items, weapons, and recipes at runtime by editing Unreal **DataTables**, instead of
-each mod shipping conflicting static-asset overrides. If TFWWorkbench is down, a
-whole class of TFW mods that depend on it are down too. And because UE4SS for a
-UE5.4 game is delivered as **rolling experimental builds** (not tidy version
-numbers), "just don't update" is harder advice to follow than it sounds — users
-grab "latest" and it silently breaks.
+## The answer (verified 2026-07-13)
+
+> **Root cause — C++ mod ABI mismatch.** TFWWorkbench's `dlls/main.dll` (219,136
+> bytes) imports UE4SS C++ symbols by decorated name. UE4SS has shipped **no stable
+> release since v3.0.1 (2024-02-14)**; "latest" is a **single rolling experimental
+> build** (currently ~`v3.0.1-1011-gb50986bd`) whose own changelog says the
+> xmake→CMake migration *"cannot guarantee ABI compatability."* A build ~160 commits
+> past the mod's ~Jan-2026 baseline no longer exports a symbol the DLL needs, so the
+> Windows loader aborts with **`0x7F ERROR_PROC_NOT_FOUND`** and `main.dll` never
+> loads. Live proof: TFWWorkbench [issue #2](https://github.com/smotti/TFWWorkbench/issues/2)
+> (open, 2026-07-14).
+
+> **Ruled out:** the `FName` default flip (`FNAME_Find`→`FNAME_Add`) — *this was our
+> original leading suspect, refuted by verification*: the mod passes `FNAME_Add`
+> explicitly and a C++ default isn't part of a mangled symbol. Also ruled out: FName
+> alignment (UE≤4.21 only) and any engine-version-support gap (UE5.4 supported since
+> May 2024).
+
+> **The fix (two options):**
+> - **Recompile** `main.dll` against current UE4SS — no source change needed; keeps
+>   you on latest. The *"fixable (probably)"* path. ([`mod/rebuild-recipe.md`](../mod/rebuild-recipe.md))
+> - **Pin** UE4SS to ~`v3.0.1-848/-849` (~Jan 2026), the ABI the shipped DLL
+>   matches. Fragile to obtain (no historical zips retained).
+>   ([`05-known-good-and-workarounds.md`](05-known-good-and-workarounds.md))
+
+> **Honest caveat:** the *mechanism* (ABI) is strongly supported; the *direction*
+> ("newer UE4SS specifically breaks it") rests on that mechanism + terraru's
+> complaint + the open issue, since **no issue records the reporter's UE4SS build**,
+> and issue #1's identical `0x7F` was closed as a user install error. Confirming
+> first-hand = one game launch to read `UE4SS.log`.
 
 ## What this repo is
 
-Four things, one investigation:
-
 | Pillar | Where | What |
 | --- | --- | --- |
-| **Knowledge base** | [`docs/`](.) | The stack, UE4SS version history, how TFWWorkbench works, the root cause, and the fix. Verified-vs-inferred throughout. |
-| **Compatibility tracker** | [`data/compat.json`](../data/compat.json) + [`tools/compat.py`](../tools/compat.py) | Machine-readable matrix of *(UE4SS build × TFWWorkbench version) → works/broken*, queryable from the CLI. |
-| **Mod / patch** | [`mod/TFWWorkbenchCompatShim/`](../mod/TFWWorkbenchCompatShim) | A UE4SS mod skeleton to host the fix/shim once the root cause is confirmed. |
-| **Evidence** | [`local-evidence/`](../local-evidence), [`seed/`](../seed) | Ground-truth forensics from a real install + the origin log. |
-
-## Current status (2026-07-13)
-
-> **Verified so far:**
-> - TFW is UE **5.4.2**; the UE4SS it uses is a **patternsleuth experimental CI
->   build**, not stable 3.0.1 (see [`local-evidence/2026-07-13-local-install.md`](../local-evidence/2026-07-13-local-install.md)).
-> - TFWWorkbench ([smotti/TFWWorkbench](https://github.com/smotti/TFWWorkbench),
->   latest **v0.2.1**, 2026-01-20) edits DataTables at runtime.
-> - UE4SS **3.0.0** flipped the `FName` constructor default from `FNAME_Find` to
->   `FNAME_Add` — a prime suspect for name-keyed DataTable lookups.
-
-> **Still open (being researched):**
-> - The exact experimental build that first broke TFWWorkbench.
-> - The precise mechanism (FName default? resolver change? engine-offset drift?).
-> - The known-good build to pin to, and whether a code fix is viable.
-
-Track the open items in [`meta/research-log.md`](../meta/research-log.md) and
-[`meta/next-session.md`](../meta/next-session.md).
+| **Knowledge base** | [`docs/`](.) | the stack, UE4SS version reality, how TFWWorkbench's ABI is fragile, root-cause analysis, the fix. Verified-vs-inferred throughout. |
+| **Compatibility tracker** | [`data/compat.json`](../data/compat.json) + [`tools/compat.py`](../tools/compat.py) | machine-readable *(UE4SS build × TFWWorkbench) → works/broken* matrix, queryable from the CLI (`pin`, `check --sha`, …). |
+| **Fix pillar** | [`mod/`](../mod) | [`rebuild-recipe.md`](../mod/rebuild-recipe.md) (the real fix) + [`TFWWorkbenchDoctor`](../mod/TFWWorkbenchDoctor) (a diagnostic mod). |
+| **Evidence** | [`local-evidence/`](../local-evidence), [`seed/`](../seed) | ground-truth forensics + the origin log. |
 
 ## How to read this repo
 
-1. [`01-the-stack.md`](01-the-stack.md) — how TFW + signature bypass + UE4SS +
-   TFWWorkbench fit together (the mental model).
-2. [`02-ue4ss-versions.md`](02-ue4ss-versions.md) — the UE4SS release/experimental
-   timeline and which changes are dangerous to a DataTable mod.
-3. [`03-tfworkbench.md`](03-tfworkbench.md) — what TFWWorkbench does and the exact
-   UE4SS surface it depends on.
-4. [`04-the-breakage.md`](04-the-breakage.md) — root-cause analysis.
-5. [`05-known-good-and-workarounds.md`](05-known-good-and-workarounds.md) — the pin
-   + downgrade steps + the shim plan.
+1. [`01-the-stack.md`](01-the-stack.md) — how TFW + bypass + UE4SS + TFWWorkbench fit.
+2. [`02-ue4ss-versions.md`](02-ue4ss-versions.md) — no-stable-since-3.0.1, git-describe, the ABI enabler.
+3. [`03-tfworkbench.md`](03-tfworkbench.md) — the C++/Lua hybrid and why its ABI is fragile.
+4. [`04-the-breakage.md`](04-the-breakage.md) — root-cause analysis (H1–H4 + ruled out).
+5. [`05-known-good-and-workarounds.md`](05-known-good-and-workarounds.md) — pin, downgrade, rebuild.
+
+Provenance + what's next: [`meta/research-log.md`](../meta/research-log.md),
+[`meta/next-session.md`](../meta/next-session.md).
