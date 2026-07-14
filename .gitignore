@@ -18,9 +18,11 @@ Thumbs.db
 *.utoc
 *.ucas
 *.sig
-UE4SS.dll
-dwmapi.dll
+*.dll
 *.log
+
+# Built/patched binaries live here locally but are never committed (see dist/README.md)
+dist/*.dll
 
 # Large downloaded UE4SS build zips kept for local bisecting (track by hash in data/, not by blob)
 builds/
