@@ -97,10 +97,22 @@ Anyone who already has a UE4SS C++ mod dev environment (the maintainer, or any T
 C++ modder) just drops the mod in, rebuilds, and ships `main.dll`. The heavy part is
 only *first-time* toolchain setup + a from-source UE4SS build on a clean machine.
 
-## Not recommended: the no-recompile binary patch
+## Stopgap: the no-recompile binary patch (produced + ABI-verified)
 
-In principle you could patch `main.dll`'s import table to point at the surviving
-`?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAFXZ` (`int16&`) export. It *might* work
-because the underlying engine field is small and little-endian, but the compiled
-code dereferences the reference as a 4-byte `int`, so it depends on the adjacent
-bytes being zero — **unverified and fragile**. Recompilation is the correct fix.
+Because the two decorated names differ by a single byte (`H`→`F`), you can repoint
+`main.dll`'s one broken import at the surviving `int16&` export in place:
+
+```
+python tools/patch-main-dll.py <v0.2.1>/dlls/main.dll dist/main.patched.dll
+python tools/abi-diff.py dist/main.patched.dll <your ue4ss/UE4SS.dll>   # -> MISSING: 0
+```
+
+This was done and **verified at the ABI level**: the patched DLL resolves all 81
+imports (it will load; no more `0x7F`). See [`../dist/README.md`](../dist/README.md)
+for the artifact + a full in-game test procedure.
+
+> ⚠️ Still **experimental**: the ABI check proves it *loads*, not that the alignment
+> is read correctly at runtime (the compiled code reads the reference as a 4-byte
+> `int`; the export is now `int16&`). Small/little-endian field → *probably* fine, but
+> **load-test in-game** and revert on any misbehavior. A recompile remains the correct
+> permanent fix.
