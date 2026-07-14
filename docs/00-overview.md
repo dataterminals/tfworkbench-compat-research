@@ -9,20 +9,15 @@ experimental builds keep changing that ABI.
 
 ## Where this came from
 
-A modder (terraru) in a TFW modding chat:
+A modder in a TFW modding chat:
 
 > "you can't use the latest ue4ss version when having TFWorkbench as a dependency…
 > Not sure what version introduced some changes that breaks the mod."
 
 Another modder: *"fixable (probably)."* ([`seed/running-log.txt`](../seed/running-log.txt).)
 
-> **Who's who:** TFWWorkbench is authored/maintained by **smotti** (it's
-> `smotti/TFWWorkbench` on GitHub). **terraru** (the modder in the origin log) is a
-> TFW modder who runs mods that depend on TFWWorkbench — his complaint is about the
-> dependency breaking, not about a mod he wrote. (A `ModAuthors="terraru"` string
-> appears in the C++ source and a community version-floor note is associated with
-> terraru, but that does not make him the author — see the note in
-> [`meta/sources.md`](../meta/sources.md).)
+TFWWorkbench itself is authored/maintained by **smotti** (`smotti/TFWWorkbench` on
+GitHub); the complaint above is from a modder whose mods *depend on* it.
 
 ## The answer (verified 2026-07-13)
 
@@ -50,7 +45,7 @@ Another modder: *"fixable (probably)."* ([`seed/running-log.txt`](../seed/runnin
 >   ([`05-known-good-and-workarounds.md`](05-known-good-and-workarounds.md))
 
 > **Honest caveat:** the *mechanism* (ABI) is strongly supported; the *direction*
-> ("newer UE4SS specifically breaks it") rests on that mechanism + terraru's
+> ("newer UE4SS specifically breaks it") rests on that mechanism + the origin-log
 > complaint + the open issue, since **no issue records the reporter's UE4SS build**,
 > and issue #1's identical `0x7F` was closed as a user install error. Confirming
 > first-hand = one game launch to read `UE4SS.log`.

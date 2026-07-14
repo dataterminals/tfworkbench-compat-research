@@ -88,7 +88,7 @@ Present mod folders: `BPML_GenericFunctions`, `BPModLoaderMod`,
 
 ## What this pins down
 
-1. The "latest ue4ss" in terraru's complaint corresponds to a **patternsleuth
+1. The "latest ue4ss" in the origin-log complaint corresponds to a **patternsleuth
    experimental CI build** like the one installed here (2026-07-12) — not a
    numbered stable release.
 2. To reproduce / bisect the breakage we compare *this* build against whichever

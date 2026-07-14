@@ -66,11 +66,7 @@ we know** — preserve provenance; never silently promote a guess to a fact.
   compatability"* — the enabler.
 - **Recommended pin:** ~`v3.0.1-848/-849` (~Jan 2026) — Nexus floor + inferred ABI
   baseline. But the Nexus "OR HIGHER" advice is now stale.
-- **TFWWorkbench is authored/maintained by smotti** (GitHub repo owner). *(Correction,
-  2026-07-14: an earlier draft here claimed terraru was the C++ author, based on a
-  `ModAuthors="terraru"` source string + a Nexus credit line — the user, a TFW-modding
-  insider, corrected this: smotti made TFWWorkbench. terraru is the origin-log modder
-  who runs mods that depend on it; his exact relationship to the project is unverified.)*
+- **TFWWorkbench is authored/maintained by smotti** (GitHub repo owner).
 
 **Overturned (this is why we verify)**
 - The `FName` `FNAME_Find`→`FNAME_Add` flip — my day-1 leading suspect (H1, "HIGH")
@@ -81,8 +77,9 @@ we know** — preserve provenance; never silently promote a guess to a fact.
 - Exact first-breaking commit between `-849` and `-1011`: **not bisected**.
 - Which specific export changed: resolvable via `dumpbin /exports` vs `main.dll`
   imports — **not yet done**.
-- Direction ("newer breaks it") rests on mechanism + terraru + issue #2, since no
-  issue records the reporter's UE4SS build and issue #1's 0x7F was a user install error.
+- Direction ("newer breaks it") rests on mechanism + the origin-log complaint +
+  issue #2, since no issue records the reporter's UE4SS build and issue #1's 0x7F was
+  a user install error.
 
 **Next**
 - First-hand confirm via `UE4SS.log`; bisect; export-diff; pursue a rebuild. See

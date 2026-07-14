@@ -64,7 +64,7 @@ won't even load. See [`03-tfworkbench.md`](03-tfworkbench.md).
 - **content mods → TFWWorkbench → UE4SS API → UE engine internals.**
 - A change **anywhere** in "UE4SS API / how it resolves engine internals" can
   break TFWWorkbench without TFWWorkbench itself changing a line. That is exactly
-  the failure terraru described: *TFWWorkbench didn't change; UE4SS did.*
+  the failure described in the origin log: *TFWWorkbench didn't change; UE4SS did.*
 
 ## Two ways people install this stack
 

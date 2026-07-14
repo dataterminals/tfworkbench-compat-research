@@ -2,7 +2,7 @@
 
 > **Status: primary cause identified (high confidence), with honest caveats.**
 > The mechanism is a **C++ mod ABI mismatch**. The *direction* ("newer UE4SS
-> specifically breaks it") rests on that mechanism plus terraru's community
+> specifically breaks it") rests on that mechanism plus the origin-log community
 > complaint plus a live open issue — not on a single version-stamped primary
 > source. That gap is stated explicitly below.
 

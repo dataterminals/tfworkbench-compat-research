@@ -1,19 +1,20 @@
-Origin of this repo — a snippet from a TFW modding chat (runninglog.txt, 2026-07-13).
+Origin of this repo — a snippet from a TFW modding chat (2026-07-13).
 This is the observation that seeded the whole investigation.
+(Handles anonymized; this repo is public.)
 
 ----------------------------------------------------------------------
-[8:21 PM] terraru [SCAV]:
+[8:21 PM] Modder A:
   Yeah you can't use the latest ue4ss version when having TFWorkbench as a
   dependency. Not sure if I still have that in my notes somewhere what version
   introduced some changes that breaks the mod.
 
-[9:34 PM] Ms. Deni [TOXIC]:
+[9:34 PM] Modder B:
   Fixable
 
-[9:34 PM] Ms. Deni [TOXIC]:
+[9:34 PM] Modder B:
   (probably)
 
-[9:38 PM] terraru [SCAV]:
+[9:38 PM] Modder A:
   Certainly.
 ----------------------------------------------------------------------
 

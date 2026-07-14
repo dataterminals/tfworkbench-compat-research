@@ -4,9 +4,7 @@
 (the release/container) + [github.com/smotti/TFWWorkbench-Cpp](https://github.com/smotti/TFWWorkbench-Cpp)
 (the C++ source, wired in as a git submodule) · **Latest:** v0.2.1 (2026-01-20) ·
 **First release:** v0.1.0 (2026-01-14) · **Author/maintainer:** **smotti** (GitHub
-repo owner). (A `ModAuthors="terraru"` string appears in `dllmain.cpp` — terraru's
-relationship to the project is unverified and does not establish authorship; see
-[`meta/sources.md`](../meta/sources.md).)
+repo owner).
 
 ## It is a C++/Lua **hybrid**, not a Lua mod
 
