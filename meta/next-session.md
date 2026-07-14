@@ -24,13 +24,20 @@ Between `-849` (works) and `-1011` (broken), build `main.dll` against successive
 UE4SS commits (or just check export presence per build) to find the boundary. Log
 each result to [`data/compat.json`](../data/compat.json) with its `UE4SS.dll` SHA-256.
 
-## 4. Ship a fix
-- **Preferred:** follow [`mod/rebuild-recipe.md`](../mod/rebuild-recipe.md) —
-  recompile `main.dll` against current UE4SS, test, add a `works` row, and offer it
-  upstream to smotti (maintainer; issue #2 is open and unanswered).
-- **Fallback for users now:** document a reliable way to obtain a ~`v3.0.1-848/-849`
-  UE4SS build (a working download/mirror is currently **unconfirmed** — see the
-  fragility notes in [`docs/05`](../docs/05-known-good-and-workarounds.md)).
+## 4. Ship a fix  ⚠️ rebuild is externally BLOCKED (2026-07-14)
+- A from-source rebuild was attempted; it is **blocked** because UE4SS's Unreal SDK
+  submodule (`Re-UE4SS/UEPseudo`) is private/removed and unobtainable — see
+  [`local-evidence/2026-07-14-build-attempt.md`](../local-evidence/2026-07-14-build-attempt.md).
+  A clean recompile therefore needs the **maintainer (smotti)** or someone with a
+  pre-existing `UEPseudo` checkout. The fix itself is still trivial (one symbol, zero
+  source changes).
+- **Options from here:**
+  - **Escalate:** post the diagnosis (exact symbol + "clean recompile") on TFWWorkbench
+    issue #2 so smotti can rebuild. (Outward-facing — confirm with the user first.)
+  - **Experimental patch:** try the no-recompile import-table patch and **load-test it
+    in-game** (only the user can run the game). See [`mod/rebuild-recipe.md`](../mod/rebuild-recipe.md).
+  - **Pin instead:** obtain a ~`v3.0.1-848/-849` UE4SS build (download/mirror
+    unconfirmed — see [`docs/05`](../docs/05-known-good-and-workarounds.md)).
 
 ## Open questions parking lot
 - Exact UE4SS commit smotti built v0.2.1 against (not pinned in the repo).

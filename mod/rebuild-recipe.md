@@ -5,6 +5,27 @@ This is the **real fix**. Because the break is a **single re-signatured symbol**
 you recompile `main.dll` against the UE4SS SDK that matches the build you run — the
 loader can then resolve the import again.
 
+> ## ⚠️ BLOCKER (2026-07-14): the public UE4SS source doesn't build from a clean clone
+>
+> A from-source build was attempted and hit a hard wall. RE-UE4SS's **Unreal SDK**
+> (the `<Unreal/*>` headers: `UStruct.hpp`, `UObject.hpp`, `UDataTable.hpp`, …) is a
+> git submodule at `deps/first/Unreal` pointing to **`git@github.com:Re-UE4SS/UEPseudo.git`**
+> — and that is **inaccessible**:
+> - the `Re-UE4SS` org returns **404** (it doesn't exist publicly; note it's a
+>   different org from the public `UE4SS-RE`),
+> - `UEPseudo` returns **404** over SSH, HTTPS, and codeload; there are **no public
+>   forks, mirrors, or snapshots**,
+> - current `main`'s `.gitmodules` still points at the same dead URL, and
+> - the official `UE4SS-RE/UE4SSCPPTemplate` transitively needs it too.
+>
+> Everything else works: CMake + Ninja + Rust + MSVC install fine, and RE-UE4SS
+> itself clones (headers like `Mod/CppUserModBase.hpp` and `LuaMadeSimple` are in the
+> main repo). Only the Unreal SDK is gated. **Consequence: a clean recompile is
+> possible only for someone who already has a `UEPseudo` checkout / access (the
+> maintainer or a core contributor).** This is very likely *why* the fix must come
+> from smotti rather than an arbitrary community member. See
+> [`local-evidence/2026-07-14-build-attempt.md`](../local-evidence/2026-07-14-build-attempt.md).
+
 > **Verified (2026-07-14): this is a clean recompile, zero source changes.** The
 > only call to the broken symbol is `dllmain.cpp:543`:
 > ```cpp

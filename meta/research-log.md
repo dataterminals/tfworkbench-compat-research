@@ -112,3 +112,30 @@ we know** — preserve provenance; never silently promote a guess to a fact.
 **Next**
 - Task #2: recompile `main.dll` against current UE4SS and confirm it loads. See
   [`next-session.md`](next-session.md).
+
+---
+
+## 2026-07-14 — Rebuild attempt blocked by a private UE4SS dependency
+
+**Done**
+- Installed a full C++ toolchain (CMake 4.4.0, Ninja, Rust 1.97 msvc, MSVC Build
+  Tools) and cloned RE-UE4SS @ `b50986bd`. Confirmed the mod build model (`cppmods/`
+  + `add_subdirectory`, mode `Game__Shipping__Win64`).
+
+**Learned (Verified) — the blocker**
+- The public RE-UE4SS **does not build from a clean clone**: its Unreal SDK submodule
+  `deps/first/Unreal` → `git@github.com:Re-UE4SS/UEPseudo.git` is **inaccessible** (the
+  `Re-UE4SS` org 404s; `UEPseudo` 404s via web/API/SSH/HTTPS/codeload; no public forks;
+  current `main` still points at the dead URL; the official CPP template inherits it).
+  So `<Unreal/*>` headers (`UStruct.hpp`, …) can't be obtained → no compile.
+- Consequence: a clean recompile is only possible for someone with an existing
+  `UEPseudo` checkout / access — realistically the maintainer (smotti). Full forensics:
+  [`local-evidence/2026-07-14-build-attempt.md`](../local-evidence/2026-07-14-build-attempt.md).
+
+**Unaffected**
+- The fix analysis stands: one re-signatured symbol, zero source changes. The build
+  *environment* is gated, not the fix.
+
+**Next**
+- Either escalate the rebuild to the maintainer (smotti), or test the experimental
+  no-recompile import-table patch in-game. User's call.
