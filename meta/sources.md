@@ -22,12 +22,6 @@ Primary sources for this investigation. Prefer these over memory; cite them in d
 - C++ source (submodule): <https://github.com/smotti/TFWWorkbench-Cpp>
   - `CMakeLists.txt` (`target_link_libraries(TFWWorkbench PUBLIC UE4SS)`) and
     `dllmain.cpp` (`RC::CppUserModBase`, registers `AddDataTableRow`/`ConfigureDataTables`).
-  - ⚠️ **Attribution caveat:** the `dllmain.cpp` `ModAuthors` field reportedly reads
-    `"terraru"`, and a dependent mod's Nexus page credits terraru "for making
-    TFWWorkbench." **This does not establish authorship** — the GitHub project is
-    smotti's, and the user (a TFW-modding insider) confirmed smotti made it. terraru's
-    actual relationship (contributor? same person? community credit?) is **unverified**.
-    An earlier draft of this repo wrongly called terraru the author; corrected 2026-07-14.
 - Releases (v0.1.0 2026-01-14, v0.2.1 2026-01-20; ships `dlls/main.dll` 219,136 B):
   <https://github.com/smotti/TFWWorkbench/releases>
 - Issue #2 (OPEN, 2026-07-14, 0x7F main.dll load fail): <https://github.com/smotti/TFWWorkbench/issues/2>
