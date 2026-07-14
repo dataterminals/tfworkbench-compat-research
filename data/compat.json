@@ -32,7 +32,7 @@
       "status": "works",
       "symptom": null,
       "confidence": "reported",
-      "notes": "RECOMMENDED PIN. Nexus-stated floor 'UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER' (author incl. Terraru) and the inferred ABI baseline main.dll was built against (mod pushed 2026-01-20). CAVEAT: exact ABI commit not pinned in the repo; -848 is a community minimum, and the 'OR HIGHER' guidance is now stale (newer builds break it).",
+      "notes": "RECOMMENDED PIN. Community floor 'UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER' (stated on a dependent mod's Nexus page, 'Construction Vendor' mod 77) and the inferred ABI baseline main.dll was built against (mod pushed 2026-01-20). CAVEAT: exact ABI commit not pinned in the repo; -848 is a community minimum, and the 'OR HIGHER' guidance is now stale (newer builds break it). Author of TFWWorkbench = smotti.",
       "sources": ["https://www.nexusmods.com/theforeverwinter/mods/77", "https://github.com/smotti/TFWWorkbench-Cpp", "https://api.github.com/repos/UE4SS-RE/RE-UE4SS/compare/v3.0.1...main"]
     },
     {

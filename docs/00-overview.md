@@ -16,10 +16,13 @@ A modder (terraru) in a TFW modding chat:
 
 Another modder: *"fixable (probably)."* ([`seed/running-log.txt`](../seed/running-log.txt).)
 
-> **Plot twist we found:** `terraru` is the **C++ author of TFWWorkbench**
-> (`ModAuthors = "terraru"` in `dllmain.cpp`), and the *"UE4SS MUST BE v3.0.1-848 OR
-> HIGHER"* note on TFW Nexus mod 77 is theirs. terraru was describing the breakage
-> of **their own mod's** dependency. The loop closes.
+> **Who's who:** TFWWorkbench is authored/maintained by **smotti** (it's
+> `smotti/TFWWorkbench` on GitHub). **terraru** (the modder in the origin log) is a
+> TFW modder who runs mods that depend on TFWWorkbench — his complaint is about the
+> dependency breaking, not about a mod he wrote. (A `ModAuthors="terraru"` string
+> appears in the C++ source and a community version-floor note is associated with
+> terraru, but that does not make him the author — see the note in
+> [`meta/sources.md`](../meta/sources.md).)
 
 ## The answer (verified 2026-07-13)
 

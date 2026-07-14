@@ -6,7 +6,7 @@ you just **recompile its `main.dll` against the UE4SS SDK that matches the build
 actually run**, so the loader can resolve the imports again.
 
 > Requires a C++ toolchain (MSVC + CMake). Ideally done by the maintainer
-> (smotti/terraru) and published, so every user benefits. Until then, a user with
+> (smotti) and published, so every user benefits. Until then, a user with
 > the toolchain can self-build. See [`docs/04-the-breakage.md`](../docs/04-the-breakage.md)
 > for why this works and [`docs/05`](../docs/05-known-good-and-workarounds.md) for
 > the alternative (pinning UE4SS).

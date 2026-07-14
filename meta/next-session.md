@@ -26,7 +26,7 @@ each result to [`data/compat.json`](../data/compat.json) with its `UE4SS.dll` SH
 ## 4. Ship a fix
 - **Preferred:** follow [`mod/rebuild-recipe.md`](../mod/rebuild-recipe.md) —
   recompile `main.dll` against current UE4SS, test, add a `works` row, and offer it
-  upstream to smotti/terraru (issue #2 is open and unanswered).
+  upstream to smotti (maintainer; issue #2 is open and unanswered).
 - **Fallback for users now:** document a reliable way to obtain a ~`v3.0.1-848/-849`
   UE4SS build (a working download/mirror is currently **unconfirmed** — see the
   fragility notes in [`docs/05`](../docs/05-known-good-and-workarounds.md)).
@@ -34,7 +34,7 @@ each result to [`data/compat.json`](../data/compat.json) with its `UE4SS.dll` SH
 ## Open questions parking lot
 - Exact UE4SS commit smotti built v0.2.1 against (not pinned in the repo).
 - Is an archived `v3.0.1-848` zip obtainable (Nexus old-files / TFW Discord)?
-- Will smotti/terraru rebuild? (no repo activity since 2026-01-20.)
+- Will smotti (maintainer) rebuild? (no repo activity since 2026-01-20.)
 - Does H2 (TObjectPtr smart-pointer rework, PR #850) ever manifest as a
   load-then-crash instead of a clean 0x7F? Only relevant if a rebuilt DLL loads but
   crashes at apply time.

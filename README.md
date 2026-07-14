@@ -38,8 +38,9 @@ so Windows aborts the load with **`0x7F ERROR_PROC_NOT_FOUND`**. Live proof:
   symbol.
 - **Fix:** recompile `main.dll` against current UE4SS (keeps latest — the *"fixable
   probably"* path), or pin UE4SS to ~`v3.0.1-848/-849`.
-- **Kicker:** `terraru` (the person in the origin log) is TFWWorkbench's C++ author —
-  they were describing the breakage of their *own* mod's dependency.
+- **Who's who:** TFWWorkbench is by **smotti** (GitHub repo owner). `terraru` (the
+  origin-log modder) runs mods that *depend on* it — his complaint is about the
+  dependency, not a mod he authored.
 
 Local forensics (the install this was verified against):
 [`local-evidence/2026-07-13-local-install.md`](local-evidence/2026-07-13-local-install.md).

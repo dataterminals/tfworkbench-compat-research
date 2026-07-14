@@ -3,8 +3,10 @@
 **Repos:** [github.com/smotti/TFWWorkbench](https://github.com/smotti/TFWWorkbench)
 (the release/container) + [github.com/smotti/TFWWorkbench-Cpp](https://github.com/smotti/TFWWorkbench-Cpp)
 (the C++ source, wired in as a git submodule) · **Latest:** v0.2.1 (2026-01-20) ·
-**First release:** v0.1.0 (2026-01-14) · **TFW Nexus:** mod 77 · **C++ author:**
-`ModAuthors = "terraru"` — the same modder whose chat message seeded this repo.
+**First release:** v0.1.0 (2026-01-14) · **Author/maintainer:** **smotti** (GitHub
+repo owner). (A `ModAuthors="terraru"` string appears in `dllmain.cpp` — terraru's
+relationship to the project is unverified and does not establish authorship; see
+[`meta/sources.md`](../meta/sources.md).)
 
 ## It is a C++/Lua **hybrid**, not a Lua mod
 
@@ -68,9 +70,9 @@ UE4SS build.
 > last pushed **2026-01-20** (v0.2.1 release day) and has **not been rebuilt
 > since**, so no `main.dll` exists for any post-Jan-2026 UE4SS ABI. The exact SDK
 > commit smotti built against is **not pinned anywhere in the repo** (CMake just
-> links the local UE4SS target) — `-848` is a community-stated floor
-> ([Nexus mod 77](https://www.nexusmods.com/theforeverwinter/mods/77):
-> *"UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER"*), not a build-verified match.
+> links the local UE4SS target) — `-848` is a community-stated floor (a *dependent*
+> mod's Nexus page — "Construction Vendor", mod 77 — states *"UE4SS MUST BE VERSION
+> v3.0.1-848 OR HIGHER"*), not a build-verified match.
 
 The breakage mechanism and the fix follow in
 [`04-the-breakage.md`](04-the-breakage.md) and

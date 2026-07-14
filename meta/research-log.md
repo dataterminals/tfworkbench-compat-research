@@ -66,8 +66,11 @@ we know** — preserve provenance; never silently promote a guess to a fact.
   compatability"* — the enabler.
 - **Recommended pin:** ~`v3.0.1-848/-849` (~Jan 2026) — Nexus floor + inferred ABI
   baseline. But the Nexus "OR HIGHER" advice is now stale.
-- **`terraru` is TFWWorkbench's C++ author** (`ModAuthors="terraru"`) — the origin-log
-  complaint is about their own mod.
+- **TFWWorkbench is authored/maintained by smotti** (GitHub repo owner). *(Correction,
+  2026-07-14: an earlier draft here claimed terraru was the C++ author, based on a
+  `ModAuthors="terraru"` source string + a Nexus credit line — the user, a TFW-modding
+  insider, corrected this: smotti made TFWWorkbench. terraru is the origin-log modder
+  who runs mods that depend on it; his exact relationship to the project is unverified.)*
 
 **Overturned (this is why we verify)**
 - The `FName` `FNAME_Find`→`FNAME_Add` flip — my day-1 leading suspect (H1, "HIGH")

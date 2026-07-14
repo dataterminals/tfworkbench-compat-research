@@ -13,8 +13,9 @@
 > `91b70e5b8b1f` / `486806ab2bed`). Confidence: **medium**.
 
 Why this build:
-- It's the **Nexus-documented floor** — [mod 77](https://www.nexusmods.com/theforeverwinter/mods/77)
-  (authors incl. Terraru): *"UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER."*
+- It's the **community-documented floor** — a dependent mod's Nexus page
+  ("Construction Vendor", [mod 77](https://www.nexusmods.com/theforeverwinter/mods/77)):
+  *"UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER."*
 - It's the **inferred ABI baseline** the shipped `main.dll` was built against
   (TFWWorkbench-Cpp last pushed 2026-01-20; -848 ≈ 2026-01-12).
 
@@ -50,7 +51,7 @@ Rebuild against the **current** UE4SS SDK and ship the new `dlls/main.dll`:
 2. Point its `UE4SS` dependency at the SDK matching the **installed** UE4SS build.
 3. `cmake` configure + build the `TFWWorkbench` SHARED target → new `main.dll`.
 4. Drop the rebuilt `main.dll` into the mod's `dlls/`; test in-game.
-5. Ideally upstream it to smotti/terraru so everyone benefits.
+5. Ideally upstream it to smotti (the maintainer) so everyone benefits.
 
 Requires the maintainer or a user with the C++ toolchain. Skeleton + a fuller
 recipe: [`mod/rebuild-recipe.md`](../mod/rebuild-recipe.md). This is the option that
