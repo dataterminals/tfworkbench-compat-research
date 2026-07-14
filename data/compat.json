@@ -4,29 +4,71 @@
     "subject": "TFWWorkbench (smotti/TFWWorkbench) x RE-UE4SS on The Forever Winter (UE 5.4.2)",
     "updated": "2026-07-13",
     "maintainer": "dataterminals",
-    "notes": "Compatibility matrix for the 'latest UE4SS breaks TFWWorkbench' problem. status: works|broken|partial|unknown. confidence: verified (first-hand)|reported (community)|inferred|untested. UE4SS CI builds carry no version metadata, so ue4ss_dll_sha256 is the stable identifier. Populated in part by the tfworkbench-compat-research workflow; unverified rows are marked confidence=untested/inferred until confirmed."
+    "notes": "Root cause = C++ mod ABI mismatch: TFWWorkbench ships a precompiled dlls/main.dll (219,136 bytes) ABI-locked to the UE4SS SDK it was built against (~Jan 2026, experimental v3.0.1-848/-849). Newer UE4SS renames/removes a mangled C++ export -> Windows loader aborts with 0x7F ERROR_PROC_NOT_FOUND. status: works|broken|partial|unknown. confidence: verified (first-hand)|reported (community/issue)|inferred|untested. UE4SS is git-describe-versioned 'v3.0.1-<N>-g<hash>' with NO stable release since 3.0.1; identify unlabeled builds by UE4SS.dll SHA-256."
   },
   "tfwworkbench_versions": [
-    {
-      "version": "0.2.1",
-      "released": "2026-01-20",
-      "source": "https://github.com/smotti/TFWWorkbench/releases"
-    }
+    { "version": "0.1.0", "released": "2026-01-14", "source": "https://github.com/smotti/TFWWorkbench/releases" },
+    { "version": "0.2.1", "released": "2026-01-20", "source": "https://github.com/smotti/TFWWorkbench/releases" }
   ],
   "entries": [
     {
-      "ue4ss_build": "experimental CI (patternsleuth) - local install 2026-07-12",
+      "ue4ss_build": "v3.0.1 (last STABLE release)",
+      "ue4ss_channel": "stable",
+      "ue4ss_date": "2024-02-14",
+      "ue4ss_commit": "d935b5b",
+      "tfwworkbench_version": "0.2.1",
+      "status": "broken",
+      "symptom": "ABI mismatch (older direction) + predates the UE5.4 experimental layout TFW uses",
+      "confidence": "inferred",
+      "notes": "Below the community floor. main.dll was compiled against a ~Jan-2026 experimental build (CppUserModBase + ue4ss/ layout); its ABI does not match bare stable 3.0.1 either. The TFW scene does not run bare 3.0.1 for UE5.4.2.",
+      "sources": ["https://www.nexusmods.com/theforeverwinter/mods/77", "https://github.com/UE4SS-RE/RE-UE4SS/releases"]
+    },
+    {
+      "ue4ss_build": "experimental v3.0.1-848 / -849 (~2026-01-11 to 01-16; commits 91b70e5b8b1f / 486806ab2bed)",
+      "ue4ss_channel": "experimental",
+      "ue4ss_date": "2026-01-16",
+      "ue4ss_commit": "486806ab2bed",
+      "tfwworkbench_version": "0.2.1",
+      "status": "works",
+      "symptom": null,
+      "confidence": "reported",
+      "notes": "RECOMMENDED PIN. Nexus-stated floor 'UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER' (author incl. Terraru) and the inferred ABI baseline main.dll was built against (mod pushed 2026-01-20). CAVEAT: exact ABI commit not pinned in the repo; -848 is a community minimum, and the 'OR HIGHER' guidance is now stale (newer builds break it).",
+      "sources": ["https://www.nexusmods.com/theforeverwinter/mods/77", "https://github.com/smotti/TFWWorkbench-Cpp", "https://api.github.com/repos/UE4SS-RE/RE-UE4SS/compare/v3.0.1...main"]
+    },
+    {
+      "ue4ss_build": "experimental builds between ~-849 and ~-1011 (Jan-Jul 2026)",
+      "ue4ss_channel": "experimental",
+      "ue4ss_date": "2026-01-16",
+      "tfwworkbench_version": "0.2.1",
+      "status": "unknown",
+      "symptom": null,
+      "confidence": "inferred",
+      "notes": "ABI drift accumulates across ~160 commits. The exact first-breaking commit was NOT bisected. Builds near -849 likely still load; the inflection point where an imported decorated symbol is renamed/removed/inlined is undetermined.",
+      "sources": ["https://api.github.com/repos/UE4SS-RE/RE-UE4SS/compare/v3.0.1...main", "https://raw.githubusercontent.com/UE4SS-RE/RE-UE4SS/main/assets/Changelog.md"]
+    },
+    {
+      "ue4ss_build": "experimental v3.0.1-1011-gb50986bd (current rolling asset, 2026-07-13)",
+      "ue4ss_channel": "experimental",
+      "ue4ss_date": "2026-07-13",
+      "ue4ss_commit": "b50986bd",
+      "tfwworkbench_version": "0.2.1",
+      "status": "broken",
+      "symptom": "Failed to load dll ...main.dll... error: [0x7f] The specified procedure could not be found (ERROR_PROC_NOT_FOUND)",
+      "confidence": "reported",
+      "notes": "Live failure: TFWWorkbench issue #2 (OPEN, 2026-07-14) reports v0.2.1's main.dll failing with 0x7F on current experimental UE4SS. CONFOUND: issue does not state the reporter's UE4SS build; issue #1's identical 0x7F was closed as a user install error.",
+      "sources": ["https://github.com/smotti/TFWWorkbench/issues/2", "https://github.com/smotti/TFWWorkbench/issues/1", "https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest"]
+    },
+    {
+      "ue4ss_build": "experimental-latest CI (local install 2026-07-12) - same channel, ~1-2 commits before b50986bd",
       "ue4ss_channel": "experimental",
       "ue4ss_date": "2026-07-12",
       "ue4ss_dll_sha256": "a79b894d4a499c066985b47354d2a3a1fc9069cebefe585ba458bb8f572930b5",
       "tfwworkbench_version": "0.2.1",
-      "status": "unknown",
-      "symptom": null,
-      "confidence": "untested",
-      "notes": "Ground-truth local build (see local-evidence/2026-07-13-local-install.md). Confirmed patternsleuth/experimental branch, not stable 3.0.1. TFWWorkbench not yet loaded against it; awaiting in-game test and community corroboration. This is a candidate for the 'latest that breaks it' end of the range.",
-      "sources": [
-        "local-evidence/2026-07-13-local-install.md"
-      ]
+      "status": "broken",
+      "symptom": "expected 0x7F main.dll load failure (predicted; confirm via UE4SS.log after a launch)",
+      "confidence": "inferred",
+      "notes": "Ground-truth local build (see local-evidence/2026-07-13-local-install.md). On the experimental-latest channel ~v3.0.1-1011, ~160 commits of C++ ABI drift past main.dll's Jan-2026 baseline. First-hand confirmation pending an in-game launch to read UE4SS.log. NOT literally commit b50986bd (that asset appeared 2026-07-13, after install).",
+      "sources": ["local-evidence/2026-07-13-local-install.md", "https://github.com/smotti/TFWWorkbench/issues/2"]
     }
   ]
 }

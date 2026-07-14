@@ -1,71 +1,94 @@
 # 04 — The breakage: root-cause analysis
 
-> **Status: hypotheses under verification.** This is the analytical heart of the
-> repo. Each hypothesis below pairs a UE4SS change
-> ([`02-ue4ss-versions.md`](02-ue4ss-versions.md)) with a TFWWorkbench dependency
-> ([`03-tfworkbench.md`](03-tfworkbench.md)) and a predicted symptom. The research
-> workflow (`wu3yvil3x`) + an in-game repro will confirm/refute each and promote
-> the winner to **Verified**.
+> **Status: primary cause identified (high confidence), with honest caveats.**
+> The mechanism is a **C++ mod ABI mismatch**. The *direction* ("newer UE4SS
+> specifically breaks it") rests on that mechanism plus terraru's community
+> complaint plus a live open issue — not on a single version-stamped primary
+> source. That gap is stated explicitly below.
 
-## Method
+## TL;DR
 
-1. Establish the **known-good** build (the one TFWWorkbench v0.2.1 was authored
-   against) and the **known-bad** build (a current experimental, e.g. the local
-   2026-07-12 install).
-2. For each candidate cause, ask: *does it produce the symptom users report, and
-   does its introduction date line up with the break?*
-3. Confirm with a **bisect** across experimental builds (see
-   [`05-known-good-and-workarounds.md`](05-known-good-and-workarounds.md)) and, if
-   possible, by reading the TFWWorkbench source to see which call actually fails.
+TFWWorkbench ships a **precompiled C++ `main.dll`** ([`03-tfworkbench.md`](03-tfworkbench.md))
+ABI-locked to the UE4SS SDK it was built against (~Jan 2026, `v3.0.1-848/-849`).
+UE4SS has no stable release since 3.0.1 and force-rolls an experimental build whose
+own changelog says it *"cannot guarantee ABI compatability."* A current build
+(~`v3.0.1-1011`, ~160 commits later) no longer exports a symbol the DLL imports, so
+the Windows loader aborts the load with **`[0x7f] The specified procedure could not
+be found` (ERROR_PROC_NOT_FOUND)**.
 
-## Candidate root causes (ranked, pending confirmation)
+## Candidate root causes (ranked)
 
-### H1 — `FName` default `FNAME_Find` → `FNAME_Add` mismatch  ·  likelihood: HIGH
-DataTable rows are keyed by `FName`. TFWWorkbench must turn a row-name string into
-an `FName` to find the row. If it (or the UE4SS API it calls) relied on the old
-default meaning "find existing," a build where the default is "add if missing"
-changes lookup behavior — a wrong/new name entry instead of the intended row.
-- **Predicted symptom:** rows silently not applied, or a mismatched/`None` row;
-  possibly a name-table entry created that never matches.
-- **Confirm by:** checking whether TFWWorkbench passes an explicit `EFindName`, and
-  whether the break coincides with a build that changed this default.
+### H1 — C++ mod ABI mismatch  ·  likelihood: HIGH  ·  **PRIMARY**
+A newer UE4SS renamed/removed/re-signatured/inlined an exported C++ symbol that
+`main.dll` imports by decorated name → the loader can't resolve the import → the
+DLL never loads.
+- **Symptom:** clean **non-load** with `0x7F ERROR_PROC_NOT_FOUND`; UE4SS.log shows
+  `Failed to load dll …main.dll… error: [0x7f]`.
+- **Evidence:** `TFWWorkbench-Cpp` links `UE4SS` and subclasses `CppUserModBase`,
+  importing `StaticFindObject`, the `FName` ctor, `UDataTable::AddRow/FindRowUnchecked/GetRowStruct`,
+  and `FProperty`/`CastField`. UE4SS ships no stable since 3.0.1; xmake→CMake
+  (PR #1067) *"cannot guarantee ABI compatability."* TFWWorkbench issues
+  [#2](https://github.com/smotti/TFWWorkbench/issues/2) (OPEN) and
+  [#1](https://github.com/smotti/TFWWorkbench/issues/1) show the exact 0x7F; upstream
+  RE-UE4SS [#696](https://github.com/UE4SS-RE/RE-UE4SS/issues/696) has a maintainer
+  diagnosing an identical 0x7F as *"the mod does not have ABI compatibility."*
+- **Caveat:** no issue records the reporter's UE4SS build, so causation *for this
+  mod* is a strong inference, not a version-stamped proof.
 
-### H2 — resolver / engine-offset drift on UE5.4.2  ·  likelihood: MEDIUM-HIGH
-patternsleuth resolvers (`StaticFindObject`, `GUObjectArray`, `FUObjectHashTables`,
-`StaticConstructObjectInternal`, `fname`) can shift or mis-fire between experimental
-builds on the same engine. A mis-resolved object-lookup path means TFWWorkbench
-never finds the DataTables.
-- **Predicted symptom:** "table not found," nothing applied, or a hard crash during
-  the workbench's scan/apply step; often correlates with a UE4SS-side warning in
-  `UE4SS.log`.
-- **Confirm by:** diffing resolver behavior across the good/bad builds; reading
-  `UE4SS.log` at the failure.
+### H2 — Struct/layout drift (loads, then crashes)  ·  likelihood: MEDIUM  ·  SECONDARY
+If the imports still resolve but a consumed UE object layout changed, `main.dll`
+loads and then reads wrong offsets → access violation at apply time.
+- **Prime candidate:** `TObjectPtr<>` reworked into a real smart pointer (PR #850);
+  the mod consumes `UDataTable::GetRowStruct()` returning `TObjectPtr<UScriptStruct>&`
+  and implicitly converts to `UScriptStruct*`. If names stay stable but size/repr
+  or `UScriptStruct`/`UDataTable` layout changes, it mis-reads.
+- **Symptom:** crash **during `AddDataTableRow`**, not a clean 0x7F non-load —
+  that's how to tell H2 from H1.
 
-### H3 — `FName` alignment 8 → 4 layout mismatch  ·  likelihood: LOW-MEDIUM
-If a build changes `FName` alignment and TFWWorkbench (or a cached AOB) reads
-`FName` fields at the old layout, comparisons/keys corrupt.
-- **Predicted symptom:** garbled names, wrong rows, intermittent crashes.
+### H3 — User installation error (confound)  ·  likelihood: MEDIUM
+0x7F is not *by itself* diagnostic of an ABI break.
+- **Evidence:** issue #1 (2026-03-15) had a byte-identical 0x7F and was **closed by
+  the reporter as "user error — incorrect install."** Issue #2 references #1 as "the
+  same problem." So the issue threads alone can't fully separate an ABI break from a
+  bad install. This is the main reason the synthesis is *well-supported*, not *proven*.
 
-### H4 — Lua API/behavior change  ·  likelihood: LOW-MEDIUM
-Changes to `FindObject`/`StaticFindObject` return semantics, `ObjectProperty = nil`
-support, or `IsValid()` reachability could make previously-valid TFWWorkbench code
-mis-behave.
-- **Predicted symptom:** Lua error in `UE4SS.log` naming a changed function.
+### H4 — patternsleuth/AOB resolver failure  ·  likelihood: LOW
+A resolver miss on TFW's exact UE5.4.2 could null out `StaticFindObject` and break
+DataTable lookups — but that would break **every** UE4SS mod on TFW, whereas the
+complaint singles out TFWWorkbench and other mods run fine. Keep only as an alternate.
 
-## Evidence board (fill as it arrives)
+### Ruled out
+- **FName default flip `FNAME_Find`→`FNAME_Add` (PR #994).** ❌ Mod passes
+  `FNAME_Add` explicitly; a C++ default arg is not part of the mangled symbol, so it
+  can't break linkage. (This was the original leading hypothesis — **refuted by
+  verification.**) The Lua-default sub-claim was also refuted (Lua was already `FNAME_Add`).
+- **FName alignment 8→4** (UE ≤ 4.21 only) and **engine-support gap** (UE5.4
+  supported since May 2024). ❌
+
+## Evidence board
 
 | Signal | Source | Supports | Status |
 | --- | --- | --- | --- |
-| `FName` default flip exists (3.0.0) | UE4SS releases | H1 | Verified (recon) |
-| patternsleuth resolvers present in local DLL | local binary scan | H2 | Verified |
-| TFWWorkbench issue: "broke after UE4SS update" | ⏳ workflow | H1–H4 | pending |
-| Exact good/bad build dates line up with a change | ⏳ workflow | (winner) | pending |
-| `UE4SS.log` error at failure | ⏳ in-game repro | (winner) | pending |
+| Mod ships precompiled `main.dll` (219,136 B), links UE4SS | TFWWorkbench-Cpp | H1/H2 | Verified |
+| No stable UE4SS since 3.0.1; force-rolled experimental | GitHub releases/tags | H1 | Verified |
+| xmake→CMake "cannot guarantee ABI compatability" | Changelog (PR #1067) | H1 | Verified |
+| Issue #2 OPEN: 0x7F main.dll load failure on v0.2.1 | TFWWorkbench #2 | H1 | Verified (reported) |
+| Issue #1 closed as user install error | TFWWorkbench #1 | H3 | Verified (reported) |
+| Upstream #696: 0x7F == C++ mod ABI incompatibility | RE-UE4SS #696 | H1 | Verified |
+| `TObjectPtr<>` smart-pointer rework | Changelog (PR #850) | H2 | Verified (change exists) |
+| FName flip cannot affect linkage | mangling analysis + PR #994 | ruled out | Verified |
+| Reporter's UE4SS build in any issue | — | direction | **missing** (open) |
 
-## Deciding the winner
+## Deciding H1 vs H2 vs H3 first-hand
 
-The confirmed cause is the one that (a) has a source-level or log-level fingerprint
-in the TFWWorkbench failure, **and** (b) whose introduction date matches the
-good→bad boundary from the bisect. Once confirmed, it drives the fix design in
-[`05-known-good-and-workarounds.md`](05-known-good-and-workarounds.md) and the shim
-in [`mod/TFWWorkbenchCompatShim/`](../mod/TFWWorkbenchCompatShim).
+Read `…\ue4ss\UE4SS.log` after one launch (see [`meta/next-session.md`](../meta/next-session.md)):
+- **`Failed to load dll …main.dll… error: [0x7f]`** → H1 (ABI non-load). ✅ expected
+- **Lua `attempt to call a nil value (AddDataTableRow/ConfigureDataTables)`** → the
+  C++ functions never registered (a softer form of H1).
+- **Crash / access violation during apply** → H2 (layout drift).
+- **`DataTable not found` for *all* tables** → H4 (resolver).
+- **Mod not even attempted / mis-placed** → H3 (install).
+
+The confirmed cause drives the fix in
+[`05-known-good-and-workarounds.md`](05-known-good-and-workarounds.md). Note H1's fix
+(recompile `main.dll`) is **not** something a Lua shim can do — see the mod pillar.

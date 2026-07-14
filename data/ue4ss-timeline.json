@@ -1,34 +1,20 @@
 {
   "meta": {
-    "subject": "RE-UE4SS (UE4SS-RE/RE-UE4SS) release + experimental timeline, focused on what affects runtime DataTable mods on UE5.4 games",
+    "subject": "RE-UE4SS timeline focused on the TFWWorkbench C++ ABI break on The Forever Winter (UE5.4.2)",
     "updated": "2026-07-13",
-    "source_of_record": "https://github.com/UE4SS-RE/RE-UE4SS/releases",
-    "notes": "Partial/seed timeline from initial recon; the research workflow extends this through July 2026 and flags breaking changes relevant to TFWWorkbench. breaking=true means a change that plausibly affects a runtime DataTable editor."
+    "source_of_record": "https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest",
+    "versioning": "git-describe 'v3.0.1-<commits-since-tag>-g<hash>'. NO stable release since v3.0.1; the only 'latest' is the rolling experimental-latest prerelease (the unreleased v4.0.0-rc1 line).",
+    "notes": "breaking=true flags a change relevant to a precompiled C++ mod (ABI) or to a runtime DataTable editor. The actual TFWWorkbench breaker is C++ ABI drift enabled by the xmake->CMake migration, NOT the FName flip (red herring)."
   },
   "versions": [
-    {
-      "version": "3.0.0",
-      "channel": "stable",
-      "date": "2024-02-04",
-      "note": "Major release. Breaking: FName ctor default EFindName FNAME_Find -> FNAME_Add; new proxy DLL scheme (dwmapi.dll replaces xinput1_3.dll); install layout moved into a ue4ss/ subfolder.",
-      "breaking": true,
-      "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/releases"]
-    },
-    {
-      "version": "3.0.1",
-      "channel": "stable",
-      "date": "2024-02-14",
-      "note": "Patch for 3.0.0. C++ mods must be rebuilt. Predates UE5.4 support, so not the build TFW uses.",
-      "breaking": false,
-      "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/releases"]
-    },
-    {
-      "version": "experimental (patternsleuth CI, rolling)",
-      "channel": "experimental",
-      "date": "2024-2026",
-      "note": "Rolling CI builds on the modern patternsleuth resolver branch. This is the channel UE5.4.2 games like TFW actually use. Exact build that breaks TFWWorkbench = the open question this repo resolves.",
-      "breaking": true,
-      "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest"]
-    }
+    { "version": "3.0.1", "channel": "stable", "date": "2024-02-14", "commit": "d935b5b", "note": "Final stable release; the anchor tag for all git-describe experimental version strings.", "breaking": false, "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/releases"] },
+    { "version": "UE 5.4 support (PR #503)", "channel": "experimental", "date": "2024-05-17", "commit": "03f3fb6", "note": "Covers TFW's UE5.4.2. Additive. Rules out an engine-version-support gap.", "breaking": false, "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/pull/503"] },
+    { "version": "Directory restructure ue4ss/ (PR #506)", "channel": "experimental", "date": "2024-05-29", "note": "Files move to <game>/ue4ss/; proxy DLL stays in Win64. Adds [Overrides] ModsFolderPaths/ControllingModsTxt (present on the local machine). Backwards-compatible; not the breaker.", "breaking": false, "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/pull/506"] },
+    { "version": "experimental-latest channel created", "channel": "experimental", "date": "2024-12-29", "note": "Single rolling prerelease; assets force-updated continuously since. Why 'latest' is a moving target with no version bump.", "breaking": false, "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest"] },
+    { "version": "FName default flip FNAME_Find->FNAME_Add (PR #994)", "channel": "experimental", "date": "2025-09-03", "commit": "d876a82", "note": "BREAKING C++ change but a RED HERRING for TFWWorkbench (mod passes FNAME_Add explicitly; default not part of the mangled symbol). Verification refuted the sub-claim that it changed the Lua FName() default.", "breaking": true, "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/pull/994"] },
+    { "version": "xmake->CMake build migration (PR #1067)", "channel": "experimental", "date": "2025-11-11", "note": "Changelog: 'cannot guarantee ABI compatability.' The root ENABLER of the C++ mod ABI instability that later bit TFWWorkbench.", "breaking": true, "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/pull/1067"] },
+    { "version": "TObjectPtr<> reworked as real smart pointer (PR #850)", "channel": "experimental", "date": "", "note": "BREAKING (v4.0.0-rc line; merge date unconfirmed). On the surface the mod touches via UDataTable::GetRowStruct() -> TObjectPtr<UScriptStruct>&. Candidate for a load-succeeds-then-crashes failure mode.", "breaking": true, "sources": ["https://github.com/UE4SS-RE/RE-UE4SS/pull/850"] },
+    { "version": "experimental v3.0.1-848 / -849 (RECOMMENDED PIN)", "channel": "experimental", "date": "2026-01-16", "commit": "486806ab2bed", "note": "Commits 91b70e5b8b1f (=848) / 486806ab2bed (=849). Nexus floor 'v3.0.1-848 or higher.' Inferred ABI baseline for TFWWorkbench v0.2.1's main.dll.", "breaking": false, "sources": ["https://www.nexusmods.com/theforeverwinter/mods/77"] },
+    { "version": "experimental-latest HEAD ~v3.0.1-1011-gb50986bd (current)", "channel": "experimental", "date": "2026-07-13", "commit": "b50986bd", "note": "main is 1011 commits ahead of the v3.0.1 tag. ~160 commits of C++ ABI drift past the mod's Jan-2026 build. Breaks TFWWorkbench v0.2.1 (0x7F).", "breaking": true, "sources": ["https://api.github.com/repos/UE4SS-RE/RE-UE4SS/compare/v3.0.1...main"] }
   ]
 }

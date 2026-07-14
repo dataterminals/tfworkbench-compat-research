@@ -15,22 +15,33 @@ put it plainly:
 > else: *"Fixable (probably)."*
 > ([`seed/running-log.txt`](seed/running-log.txt) — the origin of this repo.)
 
-> **Status:** `v0.0.1` — **investigation scaffolded (2026-07-13).** Local ground
-> truth captured; verified-research pass in flight. The exact breaking build, the
-> mechanism, and the known-good pin are **still open** — tracked honestly below and
-> in [`meta/research-log.md`](meta/research-log.md).
+> **Status:** `v0.1.0` — **root cause identified (2026-07-13),** via a verified,
+> adversarially-checked research pass (12 confirmed / 1 refuted / 1 uncertain). One
+> first-hand confirmation (read `UE4SS.log`) and a commit-level bisect remain open —
+> tracked honestly in [`meta/research-log.md`](meta/research-log.md).
 
 ---
 
-## ⚠️ The key finding so far
+## ⚠️ The answer
 
-The Forever Winter is UE **5.4.2**, and stable UE4SS **3.0.1** (Feb 2024) predates
-UE5.4 support — so TFW runs a **rolling experimental UE4SS build**, not a numbered
-release. That's *why* "the latest" silently breaks things: users grab a fresh
-experimental CI build and TFWWorkbench's runtime DataTable hooks stop matching.
+**It's a C++ mod ABI mismatch.** TFWWorkbench ships a **precompiled C++
+`main.dll`** (219 KB) that imports UE4SS symbols by decorated name. UE4SS has
+shipped **no stable release since v3.0.1 (Feb 2024)** — "latest" is a **single
+rolling experimental build** (now ~`v3.0.1-1011-gb50986bd`) whose changelog admits
+the xmake→CMake migration *"cannot guarantee ABI compatability."* A build ~160
+commits past the mod's ~Jan-2026 baseline no longer exports a symbol the DLL needs,
+so Windows aborts the load with **`0x7F ERROR_PROC_NOT_FOUND`**. Live proof:
+[TFWWorkbench issue #2](https://github.com/smotti/TFWWorkbench/issues/2) (open).
 
-Confirmed by inspecting a real install: the local `UE4SS.dll` is an official
-**patternsleuth experimental CI build** (not 3.0.1). Full forensics:
+- **Ruled out** (our original suspect): the `FName` `FNAME_Find`→`FNAME_Add` default
+  flip — the mod passes `FNAME_Add` explicitly; a C++ default isn't part of a mangled
+  symbol.
+- **Fix:** recompile `main.dll` against current UE4SS (keeps latest — the *"fixable
+  probably"* path), or pin UE4SS to ~`v3.0.1-848/-849`.
+- **Kicker:** `terraru` (the person in the origin log) is TFWWorkbench's C++ author —
+  they were describing the breakage of their *own* mod's dependency.
+
+Local forensics (the install this was verified against):
 [`local-evidence/2026-07-13-local-install.md`](local-evidence/2026-07-13-local-install.md).
 
 ---
@@ -41,7 +52,7 @@ Confirmed by inspecting a real install: the local `UE4SS.dll` is an official
 | --- | --- | --- |
 | 📚 **Knowledge base** | [`docs/`](docs) | the stack, UE4SS timeline, how TFWWorkbench works, root-cause analysis, fixes |
 | 🧮 **Compat tracker** | [`data/compat.json`](data/compat.json) · [`tools/compat.py`](tools/compat.py) | machine-readable matrix + CLI |
-| 🔧 **Fix / shim** | [`mod/TFWWorkbenchCompatShim/`](mod/TFWWorkbenchCompatShim) | UE4SS mod skeleton (inert until root cause confirmed) |
+| 🔧 **Fix** | [`mod/`](mod) | [`rebuild-recipe.md`](mod/rebuild-recipe.md) (recompile `main.dll`) + [`TFWWorkbenchDoctor`](mod/TFWWorkbenchDoctor) (diagnostic mod) |
 | 🔎 **Evidence** | [`local-evidence/`](local-evidence) · [`seed/`](seed) | forensics + origin log |
 
 ## Quick start

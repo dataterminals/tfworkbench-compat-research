@@ -52,10 +52,12 @@ means an **experimental CI build**, since stable 3.0.1 predates UE5.4 support.
 **This is the layer that changes under you.**
 
 ### 4. TFWWorkbench — the framework mod (the thing that breaks)
-A UE4SS mod that, at runtime, finds the game's **DataTables** and rewrites rows
-from JSON so multiple content mods can coexist. It depends entirely on layer 3's
-API behaving the way it did when TFWWorkbench was authored. See
-[`03-tfworkbench.md`](03-tfworkbench.md).
+A UE4SS **C++/Lua hybrid** mod that, at runtime, finds the game's **DataTables** and
+rewrites rows from JSON so multiple content mods can coexist. Its C++ half ships as a
+**precompiled `main.dll`** that is **ABI-locked** to the UE4SS build it was compiled
+against — so it depends not just on layer 3's *behavior* but on layer 3's exact
+**binary interface**. That's the fragile joint: change UE4SS's ABI and `main.dll`
+won't even load. See [`03-tfworkbench.md`](03-tfworkbench.md).
 
 ## The dependency arrows that matter
 

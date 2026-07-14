@@ -1,0 +1,7 @@
+This file is the UE4SS "mod is enabled" marker: its presence enables the mod when
+the folder is dropped into ue4ss/Mods. You can also enable it via mods.txt:
+
+    TFWWorkbenchDoctor : 1
+
+TFWWorkbenchDoctor is a read-only DIAGNOSTIC mod — it reports the UE4SS build and
+whether TFWWorkbench's C++ side loaded. It modifies nothing. See ./README.md.

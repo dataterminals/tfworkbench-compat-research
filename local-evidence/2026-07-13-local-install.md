@@ -21,6 +21,16 @@ complaint is about.
 > RE-UE4SS GitHub-Actions CI build** on the modern **patternsleuth** resolver
 > branch — i.e. a post-3.0 dev/experimental build, **not** stable 3.0.1.
 
+> **Version framing (from research, see [`docs/02`](../docs/02-ue4ss-versions.md)):**
+> UE4SS has no stable release after v3.0.1; this is a build off the single rolling
+> `experimental-latest` channel (the v4.0.0-rc line), git-describe-versioned
+> `v3.0.1-<N>-g<hash>`. Installed 2026-07-12, it sits ~1–2 commits *before* the
+> current asset `v3.0.1-1011-gb50986bd` (that asset appeared 2026-07-13, after
+> install). So it is ~160 commits of **C++ ABI drift** past TFWWorkbench v0.2.1's
+> ~Jan-2026 (`v3.0.1-848/-849`) build baseline — which is why the mod's precompiled
+> `main.dll` fails to load here. Launch once to capture the exact banner in
+> `UE4SS.log`.
+
 | Fact | Value |
 | --- | --- |
 | `ue4ss\UE4SS.dll` size | 16,519,168 bytes |

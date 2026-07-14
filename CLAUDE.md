@@ -12,9 +12,9 @@ You are working in **tfworkbench-compat-research**. Read this before acting.
 
 A focused investigation + toolkit around one compatibility break. It has four
 parts: a **docs** knowledge base, a **compat tracker** (`data/compat.json` +
-`tools/compat.py`), a **fix skeleton** (`mod/TFWWorkbenchCompatShim`), and
-**evidence** (`local-evidence/`, `seed/`). There is a small Python CLI; otherwise
-it's documentation-first.
+`tools/compat.py`), a **fix pillar** (`mod/` — `rebuild-recipe.md` + the
+`TFWWorkbenchDoctor` diagnostic mod), and **evidence** (`local-evidence/`, `seed/`).
+There is a small Python CLI; otherwise it's documentation-first.
 
 ## The mental model (load this first)
 
@@ -23,12 +23,15 @@ it's documentation-first.
 - **RE-UE4SS** = the Lua/C++ scripting system injected via a proxy `dwmapi.dll`.
   For UE5.4 it's a **rolling experimental (patternsleuth) build**, not a numbered
   stable — so "latest" is a moving target with no clean version string.
-- **TFWWorkbench** (smotti/TFWWorkbench, note double-W) = a UE4SS mod that edits
-  Unreal **DataTables at runtime** from JSON. It's a **framework dependency** other
-  mods rely on. It didn't change; UE4SS did — that's the whole problem.
-- **The break** = a newer UE4SS build changes some behavior TFWWorkbench assumes
-  (leading suspect: the `FName` ctor default `FNAME_Find`→`FNAME_Add` from 3.0.0,
-  and/or patternsleuth resolver drift). See [`docs/04-the-breakage.md`](docs/04-the-breakage.md).
+- **TFWWorkbench** (smotti/TFWWorkbench, note double-W) = a **C++/Lua hybrid** UE4SS
+  mod that edits Unreal **DataTables at runtime** from JSON. Its C++ half ships as a
+  **precompiled `main.dll`** (219 KB). It's a **framework dependency** other mods
+  rely on. It didn't change; UE4SS did — that's the whole problem.
+- **The break** = a **C++ mod ABI mismatch**: `main.dll` imports UE4SS symbols by
+  decorated name; a newer UE4SS (no stable since v3.0.1; rolling experimental
+  ~`v3.0.1-1011`) no longer exports one → Windows aborts the load with
+  **`0x7F ERROR_PROC_NOT_FOUND`**. The `FName` flip is a **ruled-out red herring**.
+  See [`docs/04-the-breakage.md`](docs/04-the-breakage.md).
 
 ## House style — non-negotiable
 
@@ -50,10 +53,10 @@ it's documentation-first.
 - **Never modify the user's game install.** `D:\SteamLibrary\steamapps\common\The
   Forever Winter` is real game data. Read/inspect only; don't swap DLLs, edit
   `mods.txt`, or launch the game without explicit instruction.
-- **The fix skeleton stays inert until a cause is confirmed.**
-  `mod/TFWWorkbenchCompatShim/Scripts/main.lua` has `ENABLE_FIX = false`. Do not
-  ship shim logic against an unconfirmed hypothesis — see the decision gate in
-  [`docs/05-known-good-and-workarounds.md`](docs/05-known-good-and-workarounds.md).
+- **No Lua "shim" can fix this.** The C++ `main.dll` fails to *load* before any Lua
+  runs, so the fix is a **recompile** ([`mod/rebuild-recipe.md`](mod/rebuild-recipe.md))
+  or a **UE4SS pin**, not Lua. [`mod/TFWWorkbenchDoctor`](mod/TFWWorkbenchDoctor) is a
+  read-only **diagnostic** only — keep it read-only.
 - **Identify builds by `UE4SS.dll` SHA-256**, since CI builds lack version metadata.
 
 ## Where to find authoritative facts
