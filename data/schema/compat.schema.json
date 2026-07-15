@@ -46,6 +46,7 @@
           "ue4ss_dll_sha256": { "type": "string", "description": "SHA-256 of UE4SS.dll — the stable identifier when metadata is absent." },
           "tfwworkbench_version": { "type": "string" },
           "status": { "type": "string", "enum": ["works", "broken", "partial", "unknown"] },
+          "recommended": { "type": "boolean", "description": "Mark the one combo `compat.py pin` should recommend. Several combos can 'work' at once (different TFWWorkbench versions, or ABI-only checks); this names the one with the strongest evidence. At most one entry should set it." },
           "symptom": { "type": ["string", "null"], "description": "Observed failure mode when broken (e.g. 'crash on load', 'tables not applied')." },
           "confidence": { "type": "string", "enum": ["verified", "reported", "inferred", "untested"] },
           "notes": { "type": "string" },

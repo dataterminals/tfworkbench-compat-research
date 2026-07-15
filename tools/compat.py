@@ -104,10 +104,20 @@ def cmd_pin(args) -> int:
         print("See docs/05-known-good-and-workarounds.md for the current best guess.")
         return 2
     order = {"verified": 0, "reported": 1, "inferred": 2, "untested": 3}
-    works.sort(key=lambda e: order.get(e.get("confidence", "untested"), 9))
+    # An explicit `recommended` flag wins: several combos can 'work' at once (different
+    # TFWWorkbench versions, or ABI-only checks with no runtime proof), and confidence
+    # alone can't rank those — it would silently fall back to file order.
+    works.sort(key=lambda e: (not e.get("recommended", False),
+                              order.get(e.get("confidence", "untested"), 9)))
     best = works[0]
     print("Recommended UE4SS build to pin (best 'works' entry):\n")
     print(fmt_entry(best))
+    others = [e for e in works[1:] if e.get("status") == "works"]
+    if others:
+        print(f"Also recorded as working ({len(others)}): "
+              + ", ".join(f"{e['ue4ss_build']} x TFWWorkbench {e['tfwworkbench_version']}"
+                          for e in others))
+        print("Run `compat.py list --status works` for the full evidence on each.")
     return 0
 
 

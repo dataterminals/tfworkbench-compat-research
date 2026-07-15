@@ -46,7 +46,13 @@ Reproduce: `python tools/abi-diff.py <main.dll> <UE4SS.dll>`. Live report:
 - **Fix:** recompile `main.dll` against current UE4SS — and the symbol proof shows
   the method still *exists* (just returns `int16&` now), so it's a **clean recompile,
   zero source changes** (`short&`→`int` converts implicitly). Or pin UE4SS to
-  ~`v3.0.1-848/-849`.
+  **`v3.0.1-894-g2172883`** + TFWWorkbench **0.2.1** (verified working; grab it from
+  the permanent [`experimental`](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental)
+  archive) — `python tools/compat.py pin`.
+- **Not every "it doesn't work" is the ABI break.** TFWWorkbench **0.1.x silently
+  ignores** JSON `Action`s it doesn't know (e.g. `AddTo`, added in 0.2.0) — no error,
+  no log line, mod just does nothing. See
+  [`local-evidence/2026-07-15-aio-bundle-forensics.md`](local-evidence/2026-07-15-aio-bundle-forensics.md).
 - **Author:** TFWWorkbench is by **smotti** (`smotti/TFWWorkbench` on GitHub); the
   origin-log complaint is from a modder whose mods *depend on* it.
 

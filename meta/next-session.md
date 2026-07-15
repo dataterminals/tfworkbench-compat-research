@@ -36,12 +36,27 @@ each result to [`data/compat.json`](../data/compat.json) with its `UE4SS.dll` SH
     issue #2 so smotti can rebuild. (Outward-facing — confirm with the user first.)
   - **Experimental patch:** try the no-recompile import-table patch and **load-test it
     in-game** (only the user can run the game). See [`mod/rebuild-recipe.md`](../mod/rebuild-recipe.md).
-  - **Pin instead:** obtain a ~`v3.0.1-848/-849` UE4SS build (download/mirror
-    unconfirmed — see [`docs/05`](../docs/05-known-good-and-workarounds.md)).
+  - **Pin instead (SOLVED, 2026-07-15):** install **UE4SS `v3.0.1-894-g2172883`** +
+    **TFWWorkbench 0.2.1** — verified working with in-game proof. One permanent URL:
+    `https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental/UE4SS_v3.0.1-894-g2172883.zip`.
+    See [`docs/05`](../docs/05-known-good-and-workarounds.md).
+
+## ✅ Bisection — DONE (2026-07-15)
+First breaking build = **`v3.0.1-929-gcd556d70`** (2026-01-30); last good =
+**`-894-g2172883`**. See [`docs/05`](../docs/05-known-good-and-workarounds.md) and
+[`tools/ue4ss-bisect.py`](../tools/ue4ss-bisect.py). **The "which build breaks it"
+question this repo was created to answer is now closed.**
+
+## Top of the list now
+- **Hand the diagnosis upstream.** [`meta/issue-2-report.md`](issue-2-report.md) can
+  now name the exact breaking commit (`cd556d706a68`) + the UVTD mechanism + the
+  working pin. Still **not posted** — outward-facing, confirm with the user first.
+- **Tell the TFW scene the pin:** TFWWorkbench 0.2.1 + UE4SS `-894` (or `-823`).
+  Correct the stale *"-848 or higher"* folklore — "or higher" is what breaks it.
 
 ## Open questions parking lot
-- Exact UE4SS commit smotti built v0.2.1 against (not pinned in the repo).
-- Is an archived `v3.0.1-848` zip obtainable (Nexus old-files / TFW Discord)?
+- Exact UE4SS commit smotti built v0.2.1 against (not pinned in the repo). Bounded:
+  ABI-compatible with both `-848` and `-894`, so it's a pre-narrowing build.
 - Will smotti (maintainer) rebuild? (no repo activity since 2026-01-20.)
 - Does H2 (TObjectPtr smart-pointer rework, PR #850) ever manifest as a
   load-then-crash instead of a clean 0x7F? Only relevant if a rebuilt DLL loads but

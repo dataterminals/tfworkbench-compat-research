@@ -13,12 +13,19 @@
 ## TL;DR
 
 TFWWorkbench ships a **precompiled C++ `main.dll`** ([`03-tfworkbench.md`](03-tfworkbench.md))
-ABI-locked to the UE4SS SDK it was built against (~Jan 2026, `v3.0.1-848/-849`).
-UE4SS has no stable release since 3.0.1 and force-rolls an experimental build whose
-own changelog says it *"cannot guarantee ABI compatability."* A current build
-(~`v3.0.1-1011`, ~160 commits later) no longer exports a symbol the DLL imports, so
-the Windows loader aborts the load with **`[0x7f] The specified procedure could not
-be found` (ERROR_PROC_NOT_FOUND)**.
+ABI-locked to a **~Jan-2026 pre-narrowing UE4SS SDK** — verified compatible with the
+whole window from `v3.0.1-848-g91b70e5` (01-12) through `v3.0.1-894-g2172883` (01-28),
+so the baseline is a **range, not a single build**. UE4SS has no stable release since
+3.0.1 and force-rolls an experimental build whose own changelog says it *"cannot
+guarantee ABI compatability."* Current builds (`-998`…`-1011`) no longer export a
+symbol the DLL imports, so the Windows loader aborts the load with **`[0x7f] The
+specified procedure could not be found` (ERROR_PROC_NOT_FOUND)**.
+
+> ⚠️ **Two different failure modes wear the same "it doesn't work" complaint.** This
+> page is about the **loud** one (`0x7F`, mod never loads). If the mod *loads fine*
+> but nothing changes in-game, you have the **silent** one — a TFWWorkbench too old
+> for your content mod's JSON `Action`s. See
+> [`03-tfworkbench.md`](03-tfworkbench.md#the-silent-failure-json-actions-are-version-gated).
 
 ## Candidate root causes (ranked)
 
