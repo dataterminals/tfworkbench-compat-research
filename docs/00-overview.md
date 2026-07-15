@@ -40,8 +40,9 @@ GitHub); the complaint above is from a modder whose mods *depend on* it.
 > **The fix (two options):**
 > - **Recompile** `main.dll` against current UE4SS — no source change needed; keeps
 >   you on latest. The *"fixable (probably)"* path. ([`mod/rebuild-recipe.md`](../mod/rebuild-recipe.md))
-> - **Pin** UE4SS to ~`v3.0.1-848/-849` (~Jan 2026), the ABI the shipped DLL
->   matches. Fragile to obtain (no historical zips retained).
+> - **Pin** UE4SS to **`v3.0.1-894-g2172883`** (2026-01-28) + TFWWorkbench **0.2.1** —
+>   *verified working, with in-game proof*. **Easy to obtain:** the `experimental`
+>   release tag permanently archives every build.
 >   ([`05-known-good-and-workarounds.md`](05-known-good-and-workarounds.md))
 
 > **Honest caveat:** the *mechanism* (ABI) is strongly supported; the *direction*

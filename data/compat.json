@@ -2,13 +2,16 @@
   "$schema": "./schema/compat.schema.json",
   "meta": {
     "subject": "TFWWorkbench (smotti/TFWWorkbench) x RE-UE4SS on The Forever Winter (UE 5.4.2)",
-    "updated": "2026-07-13",
+    "updated": "2026-07-15",
     "maintainer": "dataterminals",
-    "notes": "Root cause = C++ mod ABI mismatch: TFWWorkbench ships a precompiled dlls/main.dll (219,136 bytes) ABI-locked to the UE4SS SDK it was built against (~Jan 2026, experimental v3.0.1-848/-849). Newer UE4SS renames/removes a mangled C++ export -> Windows loader aborts with 0x7F ERROR_PROC_NOT_FOUND. status: works|broken|partial|unknown. confidence: verified (first-hand)|reported (community/issue)|inferred|untested. UE4SS is git-describe-versioned 'v3.0.1-<N>-g<hash>' with NO stable release since 3.0.1; identify unlabeled builds by UE4SS.dll SHA-256."
+    "notes": "SOLVED 2026-07-15: the first breaking build is UE4SS experimental v3.0.1-929-gcd556d70 (2026-01-30). Safe range for TFWWorkbench 0.2.1 = builds -823 .. -894 (newest archived good: -894-g2172883). Root cause = C++ mod ABI mismatch: TFWWorkbench ships a precompiled dlls/main.dll ABI-locked to the UE4SS SDK it was built against. UE4SS narrowed UStruct::GetMinAlignment (int32&->int16&) inside the private UEPseudo submodule, so the mangled export the mod imports vanished -> Windows loader aborts with 0x7F ERROR_PROC_NOT_FOUND. status: works|broken|partial|unknown. confidence: verified (first-hand)|reported (community/issue)|inferred|untested. UE4SS is git-describe-versioned 'v3.0.1-<N>-g<hash>' with NO stable release since 3.0.1; identify unlabeled builds by UE4SS.dll SHA-256. 2026-07-15: every experimental build is permanently archived under the 'experimental' release tag (851 assets, never deleted) -- pinning an old build is trivial, contrary to earlier belief. WARNING: DLL/file mtimes in redistributed bundles are REPACK times, not build times; never date a build from mtime -- use the UE4SS.log 'Git SHA #' banner or the DLL SHA-256."
   },
   "tfwworkbench_versions": [
-    { "version": "0.1.0", "released": "2026-01-14", "source": "https://github.com/smotti/TFWWorkbench/releases" },
-    { "version": "0.2.1", "released": "2026-01-20", "source": "https://github.com/smotti/TFWWorkbench/releases" }
+    { "version": "0.1.0", "released": "2026-01-14", "source": "https://github.com/smotti/TFWWorkbench/releases/tag/0.1.0" },
+    { "version": "0.1.1", "released": "2026-01-15", "source": "https://github.com/smotti/TFWWorkbench/releases/tag/0.1.1" },
+    { "version": "0.1.2", "released": "2026-01-16", "source": "https://github.com/smotti/TFWWorkbench/releases/tag/0.1.2" },
+    { "version": "0.2.0", "released": "2026-01-20", "source": "https://github.com/smotti/TFWWorkbench/releases/tag/0.2.0" },
+    { "version": "0.2.1", "released": "2026-01-20", "source": "https://github.com/smotti/TFWWorkbench/releases/tag/0.2.1" }
   ],
   "entries": [
     {
@@ -24,50 +27,81 @@
       "sources": ["https://www.nexusmods.com/theforeverwinter/mods/77", "https://github.com/UE4SS-RE/RE-UE4SS/releases"]
     },
     {
-      "ue4ss_build": "experimental v3.0.1-848 / -849 (~2026-01-11 to 01-16; commits 91b70e5b8b1f / 486806ab2bed)",
+      "ue4ss_build": "experimental v3.0.1-823-g3e2d111 (claimed DEV BASELINE)",
       "ue4ss_channel": "experimental",
-      "ue4ss_date": "2026-01-16",
-      "ue4ss_commit": "486806ab2bed",
+      "ue4ss_date": "2025-12-28",
+      "ue4ss_commit": "3e2d111681690a8a6a4837dda1dfa87a3ff6f823",
+      "ue4ss_dll_sha256": "288a4fcb32e78a4c57e186db9634ec453916211643ff62961d11d6dbf2fc0db1",
       "tfwworkbench_version": "0.2.1",
       "status": "works",
       "symptom": null,
-      "confidence": "reported",
-      "notes": "RECOMMENDED PIN. Community floor 'UE4SS MUST BE VERSION v3.0.1-848 OR HIGHER' (stated on a dependent mod's Nexus page, 'Construction Vendor' mod 77) and the inferred ABI baseline main.dll was built against (mod pushed 2026-01-20). CAVEAT: exact ABI commit not pinned in the repo; -848 is a community minimum, and the 'OR HIGHER' guidance is now stale (newer builds break it). Author of TFWWorkbench = smotti.",
-      "sources": ["https://www.nexusmods.com/theforeverwinter/mods/77", "https://github.com/smotti/TFWWorkbench-Cpp", "https://api.github.com/repos/UE4SS-RE/RE-UE4SS/compare/v3.0.1...main"]
+      "confidence": "verified",
+      "notes": "THE LIKELY COMPILE BASELINE. Community-reported (Modder C, TFW modding chat, 2026-07-15) as 'the version that was used while developing TFWWorkbench' -- reported, not proven. But it is VERIFIED ABI-good first-hand: 0.2.1's main.dll resolves 81/81 against it (and 0.1.2's 83/83); exports the int32& ?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ. UE4SS.dll 15,247,872 B, 3777 exports; commit 3e2d111 = narknon, 2025-12-28T22:26:10Z. CORROBORATION: 0.2.1's main.dll PE TimeDateStamp = 2026-01-20 15:26:44 UTC (1h before the 0.2.1 release), so the SDK it linked against MUST be a build on/before 2026-01-20 -- which EXCLUDES -894 (2026-01-28) as the baseline and leaves -823 and -848 as the plausible candidates. Import-set analysis cannot separate -823 from -848 (all 81 resolve on both). Download: https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental/UE4SS_v3.0.1-823-g3e2d111.zip (6,697,505 B). NOTE: -823 sits BELOW the Construction Vendor Nexus floor of '-848 or higher' -- that floor is about CV, not TFWWorkbench.",
+      "sources": ["local-evidence/2026-07-15-aio-bundle-forensics.md", "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental/UE4SS_v3.0.1-823-g3e2d111.zip", "https://api.github.com/repos/UE4SS-RE/RE-UE4SS/commits/3e2d111"]
     },
     {
-      "ue4ss_build": "experimental builds between ~-849 and ~-1011 (Jan-Jul 2026)",
+      "ue4ss_build": "experimental v3.0.1-848-g91b70e5",
       "ue4ss_channel": "experimental",
-      "ue4ss_date": "2026-01-16",
-      "tfwworkbench_version": "0.2.1",
-      "status": "unknown",
+      "ue4ss_date": "2026-01-12",
+      "ue4ss_commit": "91b70e5b8b1f",
+      "ue4ss_dll_sha256": "c81d29ed07f5786dfddcfad4e20adbfe89fa934c7ca4911ef831c13cda0aeae8",
+      "tfwworkbench_version": "0.1.2",
+      "status": "works",
       "symptom": null,
-      "confidence": "inferred",
-      "notes": "ABI drift accumulates across ~160 commits. The exact first-breaking commit was NOT bisected. Builds near -849 likely still load; the inflection point where an imported decorated symbol is renamed/removed/inlined is undetermined.",
-      "sources": ["https://api.github.com/repos/UE4SS-RE/RE-UE4SS/compare/v3.0.1...main", "https://raw.githubusercontent.com/UE4SS-RE/RE-UE4SS/main/assets/Changelog.md"]
+      "confidence": "verified",
+      "notes": "THE CONSTRUCTION VENDOR STACK. This exact pair ships inside ConstructionVendor_easyinstall_0.9.1.3.rar (and therefore inside the community 'AIO packet' derived from it by stripping the CV mod). Both halves verified byte-identical to their official upstream artifacts on 2026-07-15: UE4SS.dll == the DLL inside UE4SS_v3.0.1-848-g91b70e5.zip from the 'experimental' archive; TFWWorkbench Scripts/main.lua SHA-256 prefix afe9a5b2 == release 0.1.2 exactly. abi-diff: main.dll (825ba834, 223,744 B) imports 83 UE4SS symbols, 83/83 resolve. Explains the Nexus floor 'UE4SS MUST BE v3.0.1-848 OR HIGHER' -- CV ships exactly -848. CAVEAT: this stack only understands JSON Actions Add/Replace/Remove; see the 0.1.2-vs-AddTo entry in docs/03-tfworkbench.md.",
+      "sources": ["local-evidence/2026-07-15-aio-bundle-forensics.md", "https://www.nexusmods.com/theforeverwinter/mods/77"]
     },
     {
-      "ue4ss_build": "experimental v3.0.1-1011-gb50986bd (current rolling asset, 2026-07-13)",
+      "ue4ss_build": "experimental v3.0.1-894-g2172883 (RECOMMENDED PIN)",
+      "ue4ss_channel": "experimental",
+      "ue4ss_date": "2026-01-28",
+      "ue4ss_commit": "21728830cb4930262765e08722dcc9eff9a3fb30",
+      "ue4ss_dll_sha256": "678d8b02b9199c6404c3c0bc47a5dfee7ee917e5fabdf4d56eb3c1fb62c6b2c1",
+      "tfwworkbench_version": "0.2.1",
+      "status": "works",
+      "recommended": true,
+      "symptom": null,
+      "confidence": "verified",
+      "notes": "RECOMMENDED PIN for practical use -- the only combo with first-hand end-to-end RUNTIME proof. CAVEAT (2026-07-15): this is NOT the compile baseline. 0.2.1's main.dll PE TimeDateStamp is 2026-01-20 15:26:44 UTC, so it CANNOT have been linked against -894 (built 2026-01-28, 8 days later); the baseline is -823 or -848. -823/-848/-894 each pin a DIFFERENT UEPseudo commit (4d476af9 / 53f54bb0 / 2d115713), so running on -894 means the Unreal type layer moved twice after compile -- silent struct/vtable layout drift that import/export diffing CANNOT detect. Empirically harmless (the runtime log below shows correct FName writes), but if you want the closest-to-baseline pin, use -823. Both are ABI-verified. This exact pair ships inside the community Codex AIO bundle. Verified 2026-07-15: UE4SS.dll byte-identical (sha256 678d8b02...) to the DLL inside the official UE4SS_v3.0.1-894-g2172883.zip (6,878,895 B) from the 'experimental' archive; TFWWorkbench Scripts/main.lua sha256 prefix 2230fa8c == release 0.2.1 exactly; main.dll (24b05dc2, 219,136 B) byte-identical to 0.2.1's. abi-diff 81/81 resolve. Runtime proof: the bundle's own shipped UE4SS.log (2026-07-14) shows 'Starting C++ mod TFWWorkbench' with no 0x7F, then 'AddTo (Property) VendorData - Name: ScavSurplusVendor File: 001_CodexPatch.json' and 'Set FName property RowName to value: Codex.Grabber' -- i.e. the DataTable edit actually landed. Build 894 pins UEPseudo submodule 2d115713 (pre-narrowing, still exports the int32& ?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ). Download: https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental/UE4SS_v3.0.1-894-g2172883.zip",
+      "sources": ["local-evidence/2026-07-15-aio-bundle-forensics.md", "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental/UE4SS_v3.0.1-894-g2172883.zip", "https://api.github.com/repos/UE4SS-RE/RE-UE4SS/commits/2172883"]
+    },
+    {
+      "ue4ss_build": "experimental v3.0.1-848-g91b70e5 (cross-tested)",
+      "ue4ss_channel": "experimental",
+      "ue4ss_date": "2026-01-12",
+      "ue4ss_commit": "91b70e5b8b1f",
+      "ue4ss_dll_sha256": "c81d29ed07f5786dfddcfad4e20adbfe89fa934c7ca4911ef831c13cda0aeae8",
+      "tfwworkbench_version": "0.2.1",
+      "status": "works",
+      "symptom": null,
+      "confidence": "verified",
+      "notes": "ABI-only verification (static import/export diff, 2026-07-15): 0.2.1's main.dll (24b05dc2) resolves 81/81 imports against the -848 UE4SS.dll. So 0.2.1 is NOT pinned to -894 specifically; the whole pre-narrowing window works. NOT runtime-tested -- prefer the -894 entry, which has in-game proof. Useful datum: it means the ABI break is strictly a post-Jan-2026 UEPseudo change, not a -848-vs--894 difference.",
+      "sources": ["local-evidence/2026-07-15-aio-bundle-forensics.md"]
+    },
+    {
+      "ue4ss_build": "experimental v3.0.1-929-gcd556d70 (FIRST BREAKING BUILD)",
+      "ue4ss_channel": "experimental",
+      "ue4ss_date": "2026-01-30",
+      "ue4ss_commit": "cd556d706a680af35379913006153e9807aabf4a",
+      "tfwworkbench_version": "0.2.1",
+      "status": "broken",
+      "symptom": "0x7F ERROR_PROC_NOT_FOUND -- the exact build where ?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ (int32&) disappears",
+      "confidence": "verified",
+      "notes": "*** BISECTED 2026-07-15 -- THE ANSWER. *** narknon, 2026-01-30T23:02:24Z, 'chore: update UE submodule for FUObjectArray changes'; the ONLY file it touches is deps/first/Unreal, bumping UEPseudo 2d115713 -> 3a756005 (=the very first of the 13 candidate bumps). Method: binary search over the 39 archived builds in [894..1011], dumping UE4SS.dll exports from each zip in memory; 5 downloads. Boundary: -894-g2172883 GOOD (int32&, UEPseudo 2d115713) / -929-gcd556d70 BROKEN (int16&, UEPseudo 3a756005). PROOF IT IS THIS COMMIT AND NOT AN EARLIER ONE: `compare 21728830...cd556d70` = 35 commits, and cd556d706a68 is the ONLY one touching deps/first/Unreal -- so builds 895..928 all still pin 2d115713 and are GOOD (they were simply never archived). MECHANISM: those 35 commits are a UVTD (vtable-dumper) overhaul of 2026-01-28..30, incl. 2313a76620 'feat: update macrosetter, membervar and vtable templates for UVTD changes'. The regenerated Unreal layer emitted versioned getters (GetMinAlignment506 / GetMinAlignmentBase) and narrowed UStruct::GetMinAlignment to int16&. GetMinAlignment is named in NO commit message -- the break is pure collateral damage of an FUObjectArray refactor, which is why nobody found it. Reproduce: tools/ue4ss-bisect.py.",
+      "sources": ["local-evidence/2026-07-15-aio-bundle-forensics.md", "https://api.github.com/repos/UE4SS-RE/RE-UE4SS/commits/cd556d70", "https://api.github.com/repos/UE4SS-RE/RE-UE4SS/compare/21728830cb4930262765e08722dcc9eff9a3fb30...cd556d706a68"]
+    },
+    {
+      "ue4ss_build": "experimental v3.0.1-1009-gc2ac2464 / -1011-gb50986bd (current rolling)",
       "ue4ss_channel": "experimental",
       "ue4ss_date": "2026-07-13",
       "ue4ss_commit": "b50986bd",
-      "tfwworkbench_version": "0.2.1",
-      "status": "broken",
-      "symptom": "Failed to load dll ...main.dll... error: [0x7f] The specified procedure could not be found (ERROR_PROC_NOT_FOUND)",
-      "confidence": "reported",
-      "notes": "Live failure: TFWWorkbench issue #2 (OPEN, 2026-07-14) reports v0.2.1's main.dll failing with 0x7F on current experimental UE4SS. CONFOUND: issue does not state the reporter's UE4SS build; issue #1's identical 0x7F was closed as a user install error.",
-      "sources": ["https://github.com/smotti/TFWWorkbench/issues/2", "https://github.com/smotti/TFWWorkbench/issues/1", "https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest"]
-    },
-    {
-      "ue4ss_build": "experimental-latest CI (local install 2026-07-12) - same channel, ~1-2 commits before b50986bd",
-      "ue4ss_channel": "experimental",
-      "ue4ss_date": "2026-07-12",
       "ue4ss_dll_sha256": "a79b894d4a499c066985b47354d2a3a1fc9069cebefe585ba458bb8f572930b5",
       "tfwworkbench_version": "0.2.1",
       "status": "broken",
       "symptom": "0x7F ERROR_PROC_NOT_FOUND at load: unresolved import ?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAHXZ (UStruct::GetMinAlignment()->int&; UE4SS narrowed it to int16&)",
       "confidence": "verified",
-      "notes": "ABI-PROVEN by static import/export diff (2026-07-14): main.dll's 81 UE4SS imports, 80 resolve, exactly 1 missing -> deterministic 0x7F load failure. main.dll SHA-256 24b05dc2...; UE4SS ~v3.0.1-1011. See local-evidence/2026-07-14-abi-symbol-proof.md; reproduce with tools/abi-diff.py.",
+      "notes": "ABI-PROVEN by static import/export diff (2026-07-14): main.dll's 81 UE4SS imports, 80 resolve, exactly 1 missing -> deterministic 0x7F load failure. This build exports only ?GetMinAlignment@UStruct@Unreal@RC@@QEAAAEAFXZ (int16&) plus new GetMinAlignment506 / GetMinAlignmentBase. CRITICAL: downgrading to -1009 does NOT help -- builds -998, -1000, -1005, -1008, -1009 and -1011 ALL pin the identical UEPseudo submodule b2e876da, so they share the broken ABI. You must go back past the narrowing (see the -894 pin). Local install DLL a79b894d corresponds to this rolling asset family; the exact build is -1009 or -1011 (both equivalent for this purpose). See local-evidence/2026-07-14-abi-symbol-proof.md; reproduce with tools/abi-diff.py.",
       "sources": ["local-evidence/2026-07-14-abi-symbol-proof.md", "local-evidence/2026-07-13-local-install.md", "https://github.com/smotti/TFWWorkbench/issues/2"]
     }
   ]

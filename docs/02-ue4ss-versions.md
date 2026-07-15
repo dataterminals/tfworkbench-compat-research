@@ -38,8 +38,11 @@ is just the anchor the count is measured from.
 | **FName default flip** `FNAME_Find`→`FNAME_Add` (PR #994, `d876a82`) | 2025-09-03 | breaking C++ change — **RED HERRING here** (see below) |
 | **xmake→CMake migration** (PR #1067) | 2025-11-11 | changelog: *"cannot guarantee ABI compatability"* — **the ABI-instability enabler** |
 | `TObjectPtr<>` reworked as real smart pointer (PR #850) | v4.0.0-rc | breaking; on the mod's surface via `GetRowStruct()` — secondary suspect |
-| **experimental v3.0.1-848 / -849** (`91b70e5…` / `486806a…`) | 2026-01-11 / 16 | **recommended pin**; Nexus floor; inferred ABI baseline for the mod |
-| current `experimental-latest` ~v3.0.1-1011-gb50986bd | 2026-07-13 | ~160 commits of C++ ABI drift past the mod's build → **breaks it** |
+| **experimental v3.0.1-848-g91b70e5** | 2026-01-12 | **verified good (ABI)**; ships in ConstructionVendor easy-install → explains the Nexus floor *"-848 or higher"* (whose "or higher" half is now **stale**) |
+| **experimental v3.0.1-894-g2172883** (`21728830…`) | 2026-01-28 | ⭐ **RECOMMENDED PIN** — verified good with **in-game proof**; pins UEPseudo `2d115713`, the last pointer still exporting the `int32&` symbol |
+| **UVTD overhaul** (35 commits, incl. `2313a76620` vtable/macrosetter template regen) | 2026-01-28 → 30 | the **mechanism**: regenerating the Unreal layer emits versioned `GetMinAlignment506`/`GetMinAlignmentBase` and narrows `GetMinAlignment` to `int16&` |
+| **v3.0.1-929-gcd556d70** — 🔥 **THE FIRST BREAKING BUILD** | **2026-01-30** | **BISECTED.** *"chore: update UE submodule for FUObjectArray changes"* — touches **only** `deps/first/Unreal`, bumping UEPseudo `2d115713`→`3a756005`. The **only** submodule-touching commit in `21728830…cd556d70` (35 commits), so builds `895`–`928` are still good. `GetMinAlignment` is in **no** commit message → collateral damage |
+| current rolling v3.0.1-**998 … -1011** | 2026-06-29 → 07-13 | **all broken and all identical** for this purpose — every one pins UEPseudo `b2e876da`, so downgrading *within* this range is useless |
 
 ## The change that actually matters: **C++ ABI**, not FName
 
