@@ -36,9 +36,18 @@ nothing and is **dropped without an error, a crash, or even a log line**. In 0.1
 VendorData apply loop also only consumes `.Replace`, so there is no `AddTo` path at
 all. The mod loads perfectly and does **nothing**.
 
-**Diagnosing it:** if `UE4SS.log` shows `Starting C++ mod 'TFWWorkbench'` (no `0x7F`)
-but no `AddTo (Property) …` lines, your TFWWorkbench is **too old for the JSON you
+**Diagnosing it:** if `UE4SS.log` shows the C++ half **loaded** (no `0x7F`) but no
+`AddTo (Property) …` lines, your TFWWorkbench is **too old for the JSON you
 installed** — that is a version gap, *not* the ABI break. Upgrade to **0.2.1**.
+
+> **⚠️ Probe the load with `[TFWWorkbench] Registered Lua functions for mod`** — no `[Lua]`
+> prefix ⇒ it is `main.dll`'s own output, so it cannot appear unless the DLL loaded.
+> **Do not use `Starting C++ mod 'TFWWorkbench'`** (as this step did until 2026-07-16).
+> That line is emitted only when the mod is started from **`mods.txt`**; an install that
+> relies on the per-mod **`enabled.txt`** — the CV AIO's layout, and every MO2 install —
+> logs `Mod 'TFWWorkbench' has enabled.txt, starting mod.` instead and never emits it, so
+> the probe reads a **working** install as broken. See
+> [`local-evidence/2026-07-16-stale-log-from-own-desktop/`](../local-evidence/2026-07-16-stale-log-from-own-desktop/NOTES.md).
 
 **You cannot mix halves to fix it.** The Lua and `main.dll` are a **matched pair**:
 `AddTo` calls `DataTableHandlers.<T>.RowData:AddTo(…)` from `DataTableRowData.lua`

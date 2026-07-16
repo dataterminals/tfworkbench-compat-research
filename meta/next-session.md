@@ -1,45 +1,64 @@
 # 👋 Next session — desktop pickup (written 2026-07-16)
 
-Root cause is identified (C++ ABI mismatch) and the bisect is **closed**. What's left is
-one **open contradiction**, the fix pillar, and outreach. See
-[`research-log.md`](research-log.md) — newest entry last.
+Root cause is identified (C++ ABI mismatch) and the bisect is **closed**. The marker
+contradiction that used to head this file is **closed too** (2026-07-16, later — see
+[`research-log.md`](research-log.md), newest entry last). What's left is **one command on the
+desktop**, the fix pillar, and outreach.
 
 ---
 
-## 🚩 1. Start here: the marker contradiction (blocks two edits)
+## ✅ 1. RESOLVED — the marker contradiction was never a contradiction
 
-Last night's ghost-log find
-([`local-evidence/2026-07-16-ghost-log-from-cv-aio/`](../local-evidence/2026-07-16-ghost-log-from-cv-aio/NOTES.md))
-proved that **`Starting C++ mod` is a false-negative marker** — zero hits across 2,294
-lines of a log whose C++ half demonstrably loaded. The real marker is
-`[TFWWorkbench] Registered Lua functions for mod` (no `[Lua]` prefix ⇒ emitted by
-`main.dll`).
+`Starting C++ mod 'TFWWorkbench'` is **mechanism-dependent**, not absent:
 
-But [`data/compat.json`](../data/compat.json)'s **`-894` entry still cites**
-*"the bundle's own shipped UE4SS.log (2026-07-14) shows `Starting C++ mod TFWWorkbench`"*
-as its runtime proof — a string absent from every log we hold.
+| Mod started via | Log line |
+|---|---|
+| **`mods.txt`** (`TFWWorkbench : 1`) | `Starting C++ mod 'TFWWorkbench'` |
+| **`enabled.txt`** (per-mod file) | `Mod 'TFWWorkbench' has enabled.txt, starting mod.` |
 
-**Resolve before editing either entry.** Re-check **`Desktop.7z`** — it holds **G's `-894`
-log**, which is a *separate artifact* from the AIO-shipped `-894` log the compat.json entry
-quotes. Don't conflate them. Either the entry quotes a log we haven't re-examined, or the
-note is wrong.
+Both of our logs use `enabled.txt` (TFWWorkbench is absent from the stock `mods.txt` and
+ships its own `enabled.txt`), so neither emits it. Modder A's `-894` log used `mods.txt` and
+does. **So `data/compat.json`'s `-894` citation is CORRECT — leave it.** And `Desktop.7z`
+does **not** need re-checking for this: G's log has the marker because
+[ForeverWinterModSetup](https://github.com/dataterminals/ForeverWinterModSetup) appends
+`TFWWorkbench : 1` to `mods.txt`. That note was right.
 
-> The `-894` **runtime claim itself is not in doubt** — the `AddTo (Property) VendorData`
-> and `Set FName property RowName` lines are independent proof the edit landed. Only the
-> *marker* is in question. Fix the citation, not the verdict.
+> **Inferred, not source-confirmed.** The mechanism→marker mapping rests on a near-natural
+> experiment (Modder A's log and ours are the same `-894` build, differing only in enable
+> path). **Confirm against UE4SS `-894` source before relying on it.**
 
-**Then land these two together** (held back deliberately — they touch the same entries):
-- Upgrade the **`-848 (cross-tested)`** entry from ABI-only → **runtime-verified for the
-  0.1.2 pairing**; drop its *"NOT runtime-tested"* caveat. (`-848` + **0.2.1** stays
-  ABI-only — the ghost log says nothing about it.)
-- Correct the `-894` entry's marker citation per whatever `Desktop.7z` shows.
-- `python tools/compat.py validate` after editing.
+**Still true:** use `[TFWWorkbench] Registered Lua functions for mod` as the load probe — it
+is `main.dll`'s own output and mechanism-independent.
+
+## 🚩 2. Start here: one command on the desktop closes the `-848` datum
+
+The `-848` log in
+[`local-evidence/2026-07-16-stale-log-from-own-desktop/`](../local-evidence/2026-07-16-stale-log-from-own-desktop/NOTES.md)
+is **the desktop's own** (it was found on the laptop, hence the original "ghost"). It proves
+`-848` loads *some* TFWWorkbench `main.dll` at runtime — but **which version is unknown**, and
+the earlier "0.1.2" claim was an unfounded inference (it came from the dead AIO story).
+
+**On the desktop, run:**
+
+```powershell
+Get-FileHash "<game>\Windows\ForeverWinter\Binaries\Win64\ue4ss\Mods\TFWWorkbench\Scripts\main.lua" -Algorithm SHA256
+# 2230fa8c… = 0.2.1   |   afe9a5b2… = 0.1.2
+```
+
+**Then** land the `-848 (cross-tested)` edit with an honest version half — and only then
+drop its *"NOT runtime-tested"* caveat. **Do not** land it as previously written
+(`runtime-verified for the 0.1.2 pairing`): that would put `confidence: verified` on a row
+whose version half is a guess, and `tools/compat.py validate` would happily accept it.
+`python tools/compat.py validate` after editing.
 
 ## ⚠️ 2. TFWWorkbenchDoctor rewrite — retarget before implementing
 
 The proposal on record (*"parse UE4SS.log for `Starting C++ mod 'TFWWorkbench'` + absence
-of `[0x7f]`"*) **would reproduce the exact false negative it exists to fix.** Retarget it at
-`[TFWWorkbench] Registered Lua functions for mod`.
+of `[0x7f]`"*) **must not ship as written.** Per §1 that line only appears on the `mods.txt`
+path, so the probe reports **"broken"** for every install started via `enabled.txt` — which
+is every **MO2** install and the **CV AIO's** own layout. Narrower than once thought, but it
+lands squarely on our users. Retarget it at
+`[TFWWorkbench] Registered Lua functions for mod` (mechanism-independent).
 
 Also: grep the **bracketed** `[0x7f]` — bare `0x7f` matches inside every `0x7ff6…` address
 the scanner prints. Keep the mod read-only.
