@@ -257,3 +257,52 @@ had once bisected the break but the messages were lost. So we bisected it oursel
   in-game test of the patched `main.dll`. The *diagnosis* is now complete enough to
   hand upstream: `meta/issue-2-report.md` can name the exact breaking commit.
 - Ask Modder C whether `-823` vs `-848` can be settled from the lost chat history.
+
+## 2026-07-16 — A ghost `-848` log, and the marker we were grepping for does not exist
+
+Recovered a `UE4SS.log` + `bitfix.txt` from the dev box's MO2 **overwrite** folder. Full
+write-up: [`local-evidence/2026-07-16-ghost-log-from-cv-aio/`](../local-evidence/2026-07-16-ghost-log-from-cv-aio/NOTES.md)
+(the `UE4SS.log` itself is gitignored per `*.log`; identify it by sha256
+`bddf20a2b4f1008b1d386360d9dacf39c56763471068834783f52fcafa6becd2`, 193,469 B, 2,294 lines).
+
+> **Verified:** the log is **not from this machine**. Three independent proofs — no `H:`
+> drive exists here; RootBuilder has no `H…The_Forever_Winter` cache folder (it bakes the
+> drive letter into the folder name, and the Cyberpunk pair proves old letters persist);
+> and MO2's usvfs logs show sessions on 07-12/14/15/16 but **not** 07-13. It rode in inside
+> `All-in-one file for ConstructionVendor-77-0-9-1-3-1768682266.7z` and was swept into
+> `overwrite\Root\` by RootBuilder, 7-Zip preserving the packager's mtimes.
+
+> **Verified:** it is first-hand **runtime** proof for **`-848` + TFWWorkbench 0.1.2** (the
+> Construction Vendor stack). Banner = `Git SHA #91b70e5` → `-848`. L963 emits
+> `[TFWWorkbench] Registered Lua functions for mod` with **no `[Lua]` prefix** — that is
+> `main.dll` (CppUserModBase) output, so the C++ half loaded. No `[0x7f]`. Clean 70-min
+> session.
+
+**Marker correction — this invalidates a planned tool design.**
+`Starting C++ mod` returns **zero hits across all 2,294 lines even though the DLL
+demonstrably loaded** — and likewise in the dev box's own `-894` log. It is a **false
+negative**. Use `[TFWWorkbench] Registered Lua functions for mod` as the "main.dll loaded"
+marker instead. The `TFWWorkbenchDoctor` rewrite proposal on record (*"parse UE4SS.log for
+`Starting C++ mod 'TFWWorkbench'` + absence of `[0x7f]`"*) **would reproduce the very false
+negative it is meant to fix** — retarget it before implementing.
+
+Also: grepping bare `0x7f` matches inside every `0x7ff6…` address the scanner prints.
+Always search the bracketed `[0x7f]`.
+
+Corollary to the never-date-a-build-from-an-mtime rule: **never trust a `UE4SS.log` without
+checking its paths resolve on the machine you are standing on.** MO2's Overwrite never
+self-clears and outranks every mod, so a log that arrived inside a mod archive sits in
+exactly the right drawer looking authoritative forever.
+
+**Next**
+- **Open contradiction — do not paper over it.** `data/compat.json`'s `-894` entry cites
+  *"the bundle's own shipped UE4SS.log (2026-07-14) shows `Starting C++ mod TFWWorkbench`"*
+  as its runtime proof, but that string is absent from every log we hold. Either that entry
+  quotes a log we have not re-checked, or the note is wrong. **Re-check `Desktop.7z`
+  (G's `-894` log — a separate artifact from the AIO's) before editing either.** Whichever
+  way it resolves, the `-894` runtime claim itself is not in doubt (the `AddTo` + `FName`
+  write lines are independent proof); only the *marker* is.
+- **Pending edit, deliberately not yet made:** upgrade the `-848 (cross-tested)` entry from
+  ABI-only to **runtime-verified for the 0.1.2 pairing**, and drop its *"NOT runtime-tested"*
+  caveat. Held back only because the marker question above touches the same entries — land
+  them together. `-848` + **0.2.1** remains ABI-only; this log says nothing about it.
