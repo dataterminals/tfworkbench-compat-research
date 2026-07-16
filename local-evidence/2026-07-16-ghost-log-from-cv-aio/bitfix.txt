@@ -1,0 +1,11 @@
+2026-07-13 06:15:39.541826600 [INFO] <bitfix:102>:bitfix v0.1.0-a2df008 loaded
+2026-07-13 06:15:39.542004700 [INFO] <bitfix:150>:loading lua patches
+2026-07-13 06:15:39.543230000 [INFO] <bitfix:282>:loaded "sig"
+2026-07-13 06:15:39.543288600 [INFO] <bitfix:154>:executing patches
+2026-07-13 06:15:39.543492300 [INFO] <bitfix:306>:entered lua context
+2026-07-13 06:15:39.543567600 [INFO] <bitfix:352>:scanning page: 0
+2026-07-13 06:15:39.570876200 [INFO] <bitfix:356>:scan results: [[7FF62FEDFF40, 7FF62FEE0290]]
+2026-07-13 06:15:39.571002500 [INFO] <bitfix:367>:calling patcher sig/1: on 7FF62FEDFF40
+2026-07-13 06:15:39.571036800 [INFO] <bitfix:367>:calling patcher sig/1: on 7FF62FEE0290
+2026-07-13 06:15:39.571052900 [INFO] <bitfix:218>:writing C3 to 7FF62FEE0290
+2026-07-13 06:15:39.571288000 [INFO] <bitfix:156>:done executing
