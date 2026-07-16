@@ -260,8 +260,13 @@ had once bisected the break but the messages were lost. So we bisected it oursel
 
 ## 2026-07-16 — A ghost `-848` log, and the marker we were grepping for does not exist
 
+> ⚠️ **This entry is superseded — see the 2026-07-16 (later) entry at the end of this file.**
+> Its provenance story (the AIO shipped the log) and its `0.1.2` pairing are **wrong**, and
+> its marker claim is over-corrected. The folder it links to has been renamed accordingly.
+> Left in place per house style: entries are corrected by appending, not by rewriting.
+
 Recovered a `UE4SS.log` + `bitfix.txt` from the dev box's MO2 **overwrite** folder. Full
-write-up: [`local-evidence/2026-07-16-ghost-log-from-cv-aio/`](../local-evidence/2026-07-16-ghost-log-from-cv-aio/NOTES.md)
+write-up: [`local-evidence/2026-07-16-stale-log-from-own-desktop/`](../local-evidence/2026-07-16-stale-log-from-own-desktop/NOTES.md)
 (the `UE4SS.log` itself is gitignored per `*.log`; identify it by sha256
 `bddf20a2b4f1008b1d386360d9dacf39c56763471068834783f52fcafa6becd2`, 193,469 B, 2,294 lines).
 
@@ -306,3 +311,92 @@ exactly the right drawer looking authoritative forever.
   ABI-only to **runtime-verified for the 0.1.2 pairing**, and drop its *"NOT runtime-tested"*
   caveat. Held back only because the marker question above touches the same entries — land
   them together. `-848` + **0.2.1** remains ABI-only; this log says nothing about it.
+
+## 2026-07-16 (later) — The "ghost" log is **ours**, and the missing marker is a *mechanism*, not a bug
+
+The entry above is **wrong in two ways**. Both errors came from the same habit: treating an
+absence of evidence on *this* machine as evidence of absence, then inventing a story to
+explain it. Correcting the record; the marker contradiction that entry raised is **closed**.
+
+**Corrected (the entry immediately above is WRONG)**
+
+- ❌ *"It rode in inside `All-in-one file for ConstructionVendor-77-…-1768682266.7z`, 7-Zip
+  preserving the packager's mtimes."* **Dead on arithmetic.** That trailing field is Nexus's
+  upload timestamp: `1768682266` = **2026-01-17 20:37 UTC**. An archive published in January
+  cannot contain a log whose own timestamps read **2026-07-13**. The story was invented to
+  explain a fact ("not this machine") that had a much simpler cause.
+
+  > **Verified:** the log is not the laptop's. `SYLG5` (Dell G5 5505, a **laptop**) has never
+  > had an `H:` drive — `HKLM\SYSTEM\MountedDevices` records every letter ever assigned and
+  > lists only `C: D: E: F: G:`.
+  >
+  > **Inferred (high confidence):** it is **our own desktop's** log. The user runs TFW from
+  > `H:` on the desktop, `C:`/`D:` on the laptop; both logs say `Timezone: America/New_York`.
+  > The laptop's `_backup_TheForeverWinter_20260714_014349` (07-14 01:43) holds **only** the
+  > laptop's own `bitfix.txt` (1,686 B / 07-12) and **no `UE4SS.log`**; `mods\RE-UE4SS` and
+  > `mods\TFWWorkbench` appear **07-14 01:47**. The 843 B / 07-13 `bitfix.txt` *replaced* the
+  > laptop's 1,686 B one while carrying an **older** mtime — a timestamp-preserving copy.
+
+  The three "proofs" in the entry above were each true and jointly established only *"not
+  written by this machine's MO2."* **That does not imply "not ours."** A second machine of
+  your own is the nastiest form of this trap: same person, same timezone, same mod versions,
+  plausible date. The only tell was a drive letter.
+
+- ❌ *"first-hand runtime proof for `-848` + TFWWorkbench **0.1.2**."* The `-848` half stands
+  (banner `Git SHA #91b70e5`; L963 `[TFWWorkbench] Registered Lua functions for mod`, no
+  `[Lua]` prefix ⇒ `main.dll` loaded; no `[0x7f]`; clean 70-min session). **The `0.1.2` half
+  was inferred purely from "the CV stack ships 0.1.2"** — which died with the AIO story.
+  It is the desktop's install and we have not inspected it. `main.dll` is byte-identical
+  across 0.1.0–0.2.0 (`825ba834`) and differs in 0.2.1 (`24b05dc2`), and **both** emit the
+  same `Registered Lua functions` line, so the log cannot identify its own version. Zero
+  `AddTo` lines is equally consistent with 0.1.x *or* 0.2.1-with-no-JSON-mods.
+  ⇒ **The pending `-848` upgrade must NOT be made as written.** `python tools/compat.py
+  validate` would have accepted a `confidence: verified` row whose version half is a guess.
+  **To close it: hash `Scripts/main.lua` on the desktop** (`2230fa8c…` = 0.2.1,
+  `afe9a5b2…` = 0.1.2). One command.
+
+**✅ The marker contradiction is CLOSED — and `compat.json`'s `-894` citation is CORRECT.**
+
+The entry above claimed `Starting C++ mod` is "a false negative — zero hits across every log
+we hold." Over-corrected. It is **mechanism-dependent**.
+
+> **Verified:** UE4SS starts mods from **`mods.txt`** first, then from per-mod
+> **`enabled.txt`**. In both logs we hold, TFWWorkbench is **absent from `mods.txt`** (the
+> stock file RE-UE4SS ships lists 8 mods, none of them TFWWorkbench) and ships its own
+> `enabled.txt` — so it starts on the enabled.txt path and the log reads
+> `Mod 'TFWWorkbench' has enabled.txt, starting mod.` Neither log contains
+> `Starting C++ mod`. Modder A's `-894` log (quoted in
+> `local-evidence/2026-07-15-aio-bundle-forensics.md`) **does** contain it.
+
+> **Inferred:** the **enable mechanism decides the marker** — `mods.txt` → `Starting C++ mod
+> 'X'`; `enabled.txt` → `Mod 'X' has enabled.txt, starting mod.` Support: a near-natural
+> experiment — Modder A's log and our 2026-07-16 log are the **same `-894` build**, differing
+> only in enable path, with the marker present/absent accordingly. **Not confirmed against
+> UE4SS `-894` source; do that before relying on it.**
+
+So there was never a contradiction: both statements are true of their own logs. **No
+`compat.json` edit is needed for the `-894` citation — leave it.** And `Desktop.7z` does not
+need re-checking to resolve this: **G's log has the marker because
+[ForeverWinterModSetup](https://github.com/dataterminals/ForeverWinterModSetup) appends
+`TFWWorkbench : 1` to `mods.txt`.** That note was **right**; the entry above wrongly implied
+it was misremembered.
+
+**Still true, and now better founded:** use **`[TFWWorkbench] Registered Lua functions for
+mod`** as the "main.dll loaded" probe — it is `main.dll`'s own output and mechanism-independent.
+The `TFWWorkbenchDoctor` rewrite proposal (*"parse for `Starting C++ mod 'TFWWorkbench'`"*)
+still **must not ship**: it returns "broken" for every `enabled.txt` install, which is every
+MO2 install and the CV AIO's own layout. The failure mode is narrower than the entry above
+said, but it is real — and it lands precisely on our users.
+
+**Elsewhere:** the MO2-side findings from this session (Root Builder must be enabled once
+UE4SS is in play; TFWWorkbench's `os.execute` mkdir access-violates under MO2 → pre-create
+the `DataTable` tree in Overwrite) are written up in **ForeverWinterMO2Support**
+`docs/UE4SS-TFWWORKBENCH.md`, not here — they are MO2 packaging facts, not compat facts.
+
+**Next**
+- Hash the desktop's `Scripts/main.lua` → completes the `-848` runtime datum, then land the
+  `-848 (cross-tested)` edit with an honest version half.
+- Confirm the `mods.txt`/`enabled.txt` marker mechanism against UE4SS `-894` source; then
+  retarget `mod/TFWWorkbenchDoctor` at `Registered Lua functions` and fix its `_G` check.
+- `docs/03-tfworkbench.md`'s "Diagnosing it" step used `Starting C++ mod` as the load probe —
+  corrected in this session to be mechanism-aware.
